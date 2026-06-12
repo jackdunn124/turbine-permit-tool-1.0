@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gas Turbine Air-Permitting Lane Finder (Texas / Federal)</title>
+<style>
+  :root{
+    --navy:#1f4e78; --navy2:#2e6ba8; --bg:#f4f6f9; --card:#ffffff;
+    --ink:#1d2733; --mut:#5b6b7b; --line:#dfe5ec;
+    --green:#1b8a4b; --greenbg:#dff3e6; --amber:#b97b00; --amberbg:#fff3d6;
+    --red:#c0392b; --redbg:#fbe2de; --blue:#0b63c4; --bluebg:#e6f0fb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Segoe UI',Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.5}
+  header{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:22px 26px}
+  header h1{margin:0 0 4px;font-size:21px}
+  header p{margin:0;opacity:.9;font-size:13.5px}
+  .wrap{max-width:1180px;margin:0 auto;padding:20px}
+  .grid{display:grid;grid-template-columns:380px 1fr;gap:20px}
+  @media(max-width:880px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 18px 16px;margin-bottom:18px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+  .card h2{margin:0 0 14px;font-size:15px;color:var(--navy);text-transform:uppercase;letter-spacing:.04em;border-bottom:2px solid var(--line);padding-bottom:8px}
+  label{display:block;font-size:12.5px;font-weight:600;color:var(--mut);margin:12px 0 4px}
+  .hint{font-weight:400;color:#8a99a8;font-size:11.5px}
+  input,select{width:100%;padding:8px 10px;border:1px solid #c7d0da;border-radius:6px;font-size:14px;background:#fff;color:var(--ink)}
+  input:focus,select:focus{outline:none;border-color:var(--navy2);box-shadow:0 0 0 2px var(--bluebg)}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .pill{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11.5px;font-weight:700}
+  .ok{background:var(--greenbg);color:var(--green)} .warn{background:var(--amberbg);color:var(--amber)} .bad{background:var(--redbg);color:var(--red)}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:4px}
+  th,td{padding:7px 9px;text-align:right;border-bottom:1px solid var(--line)}
+  th:first-child,td:first-child{text-align:left}
+  thead th{background:var(--navy);color:#fff;font-size:12px;text-transform:uppercase;letter-spacing:.03em}
+  tbody tr:hover{background:#f8fafc}
+  td.tpy{font-weight:700}
+  table.cmp{font-size:12px;margin-top:0}
+  table.cmp th,table.cmp td{text-align:center;padding:5px 6px;border:1px solid var(--line)}
+  table.cmp td:first-child,table.cmp th:first-child{text-align:left;font-weight:600;color:var(--mut);background:#f6f8fb}
+  table.cmp thead th{background:var(--navy);font-size:11px}
+  table.cmp thead th span{font-weight:400;font-size:9.5px;opacity:.9;text-transform:none;letter-spacing:0}
+  table.cmp tbody tr:nth-child(even){background:#fafbfd}
+  .meter{display:flex;gap:3px;margin:8px 0 3px}
+  .seg{height:7px;flex:1;border-radius:2px;background:#e3e8ee}
+  .seg.on1{background:#1b8a4b}.seg.on2{background:#86b81a}.seg.on3{background:#e0a200}.seg.on4{background:#c0392b}
+  .burden{font-size:10.5px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.03em}
+  .stepgrp{font-size:11.5px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.04em;margin:14px 0 4px;border-bottom:1px solid var(--line);padding-bottom:3px}
+  ol.steps{margin:0;padding-left:22px;font-size:13px;color:#3a4757}
+  ol.steps li{margin:8px 0;line-height:1.55}
+  ol.steps b{color:var(--ink)}
+  ol.steps a{color:var(--blue);text-decoration:none;font-weight:600}
+  ol.steps a:hover{text-decoration:underline}
+  .suggestbox{margin-top:12px;background:var(--bluebg);border:1px solid #cfe0f5;border-radius:8px;padding:10px 12px;font-size:12.5px;color:#23415f;line-height:1.55}
+  .suggestbox b{color:var(--navy)}
+  details#snapcard{padding-top:10px;padding-bottom:10px}
+  details#snapcard summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;font-weight:700;color:var(--navy);font-size:13px}
+  details#snapcard summary::-webkit-details-marker{display:none}
+  details#snapcard summary::after{content:'▸ show';font-size:12px;color:var(--navy2);font-weight:700}
+  details#snapcard[open] summary::after{content:'▾ hide'}
+  details#nextcard summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between}
+  details#nextcard summary::-webkit-details-marker{display:none}
+  details#nextcard summary h2{margin:0;border-bottom:none;padding-bottom:0}
+  details#nextcard summary::after{content:'▸ show';font-size:13px;font-weight:700;color:var(--navy2);white-space:nowrap}
+  details#nextcard[open] summary::after{content:'▾ hide'}
+  .unittoggle{display:inline-flex;border:1px solid #fff;border-radius:6px;overflow:hidden}
+  .utg{background:rgba(255,255,255,.15);color:#fff;border:none;padding:8px 12px;font-size:12.5px;font-weight:700;cursor:pointer}
+  .utg.active{background:#fff;color:var(--navy)}
+  .printbtn{background:#fff;color:var(--navy);border:none;border-radius:6px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer}
+  .printbtn:hover{background:#eaf1f8}
+  @media print{
+    body{background:#fff;font-size:11.5px}
+    .printbtn,.adv{display:none!important}
+    .wrap{max-width:none;padding:6px}
+    header,.card,.lane,.verdict,thead th,.cellg,.cella,.cellr,.seg,table.cmp td:first-child{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .grid{grid-template-columns:1fr 1fr}
+    .lane{opacity:1!important}
+    details.law{break-inside:avoid}
+    details.law div{display:block!important}
+  }
+  .cellg{background:var(--greenbg)} .cella{background:var(--amberbg)} .cellr{background:var(--redbg)}
+  .verdict{padding:14px 16px;border-radius:9px;margin-bottom:12px;border-left:5px solid}
+  .verdict h3{margin:0 0 4px;font-size:15px} .verdict p{margin:0;font-size:13.5px;color:var(--mut)}
+  .v-ok{background:var(--greenbg);border-color:var(--green)} .v-warn{background:var(--amberbg);border-color:var(--amber)} .v-bad{background:var(--redbg);border-color:var(--red)}
+  .lanes{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px}
+  @media(max-width:560px){.lanes{grid-template-columns:1fr}}
+  .lane{border:1.5px solid var(--line);border-radius:9px;padding:12px 13px;opacity:.5;transition:.15s}
+  .lane.active{opacity:1;border-color:var(--navy2);box-shadow:0 2px 10px rgba(31,78,120,.15);background:#fbfdff}
+  .lane.dim{opacity:.38}
+  .lane h4{margin:0 0 5px;font-size:13.5px;color:var(--navy)}
+  .lane .tag{font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:5px;background:#eef2f7;color:var(--mut);float:right}
+  .lane.active .tag{background:var(--navy);color:#fff}
+  .lane ul{margin:6px 0 0;padding-left:16px;font-size:12px;color:var(--mut)} .lane li{margin:2px 0}
+  details.law{background:var(--card);border:1px solid var(--line);border-radius:8px;margin-bottom:8px;padding:0 14px}
+  details.law summary{cursor:pointer;font-weight:700;padding:11px 0;color:var(--navy);font-size:14px;list-style:none;display:flex;justify-content:space-between;align-items:center}
+  details.law summary::-webkit-details-marker{display:none}
+  details.law summary::after{content:'+';font-size:18px;color:var(--navy2)}
+  details.law[open] summary::after{content:'–'}
+  details.law div{padding:0 0 13px;font-size:13.5px;color:#3a4757}
+  details.law b{color:var(--ink)}
+  .kv{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px dashed var(--line)}
+  .kv span:last-child{font-weight:700}
+  .foot{font-size:11.5px;color:#8a99a8;margin-top:14px;line-height:1.55}
+  .adv summary{cursor:pointer;font-size:12px;color:var(--navy2);font-weight:600;margin-top:6px}
+  .badgerow{margin:2px 0 10px}
+</style>
+</head>
+<body>
+<header style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
+  <div>
+    <h1>Gas Turbine Air-Permitting Lane Finder</h1>
+    <p>Live screening of federal (PSD / NSPS / Title V) and Texas (TCEQ) permitting paths for stationary combustion turbines. Planning tool — not a permit determination.</p>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <div class="unittoggle"><button id="btn-us" class="utg active" onclick="setUnits('us')">US units</button><button id="btn-si" class="utg" onclick="setUnits('si')">Metric (SI)</button></div>
+    <button class="printbtn" onclick="printPDF()">🖨 Print / Save as PDF</button>
+  </div>
+</header>
+
+<div class="wrap">
+<div class="grid">
+
+  <!-- ============ INPUT COLUMN ============ -->
+  <div>
+    <div class="card">
+      <h2>1 · Turbine</h2>
+      <label>Turbine model <span class="hint">(presets are nominal ISO, simple cycle, natural gas — verify with vendor)</span></label>
+      <select id="preset" onchange="applyPreset()"></select>
+      <div class="row2">
+        <div><label>Net output / unit (MW)</label><input id="mw" type="number" step="0.1" value="40" oninput="calc()"></div>
+        <div><label>Number of units</label><input id="units" type="number" step="1" value="4" oninput="calc()"></div>
+      </div>
+      <div class="row2">
+        <div><label>Heat rate (<span id="u_hr">Btu/kWh</span>, LHV)</label><input id="hr" type="number" step="1" value="10630" oninput="calc()"></div>
+        <div><label>LHV→HHV factor</label><input id="hhv" type="number" step="0.001" value="1.108" oninput="calc()"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>2 · Operation</h2>
+      <label>Operating hours / yr <span class="hint">(PTE uses 8,760 unless a permit caps hours)</span></label>
+      <input id="hours" type="number" step="10" value="8760" oninput="calc()">
+      <label>Location / air-quality status</label>
+      <select id="status" onchange="calc()">
+        <option value="att">Attainment area — PSD program (e.g. Bastrop / Austin-Round Rock)</option>
+        <option value="na_mod">Ozone nonattainment — Marginal/Moderate (NSR @100 tpy)</option>
+        <option value="na_ser">Ozone nonattainment — Serious (NSR @50 tpy)</option>
+        <option value="na_sev">Ozone nonattainment — Severe (NSR @25 tpy)</option>
+      </select>
+    </div>
+
+    <div class="card">
+      <h2>3 · Emission Controls</h2>
+      <label>NOx control</label>
+      <select id="noxsel" onchange="syncCtrl();calc()">
+        <option value="9">DLN1+ / upgraded combustor — ~9 ppm</option>
+        <option value="15">DLN (legacy, e.g. PG6561B) — ~15 ppm</option>
+        <option value="25">Water/steam injection — ~25 ppm</option>
+        <option value="5" selected>DLN + SCR — ~5 ppm</option>
+        <option value="3">DLN + SCR (tuned) — ~3 ppm</option>
+        <option value="2">DLN + SCR (aggressive) — ~2 ppm</option>
+        <option value="custom">Custom ppm…</option>
+      </select>
+      <input id="noxppm" type="number" step="0.1" value="5" style="margin-top:6px;display:none" oninput="calc()">
+      <label>CO control</label>
+      <select id="cosel" onchange="syncCtrl();calc()">
+        <option value="25" selected>Uncontrolled — ~25 ppm</option>
+        <option value="9">Good DLN tune — ~9 ppm</option>
+        <option value="4">Oxidation catalyst — ~4 ppm</option>
+        <option value="2">Oxidation catalyst (high) — ~2 ppm</option>
+        <option value="custom">Custom ppm…</option>
+      </select>
+      <input id="coppm" type="number" step="0.1" value="25" style="margin-top:6px;display:none" oninput="calc()">
+
+      <details class="adv">
+        <summary>Advanced emission factors</summary>
+        <p class="hint" style="margin:6px 0 2px">Leave these at the defaults (EPA Method 19 / AP-42) for screening. Only adjust if you have vendor-guaranteed or stack-test/CEMS emission rates, or your actual pipeline-gas sulfur spec (affects SO2/H2SO4) — or to switch the NOx factor to the exact basis your consultant will use when you're near the 100 tpy line.</p>
+        <div class="row2" style="margin-top:8px">
+          <div><label>NOx <span class="hint" id="u_fnox">lb/MMBtu·ppm</span></label><input id="fnox" type="number" step="0.00001" value="0.00387" oninput="calc()"></div>
+          <div><label>CO <span class="hint" id="u_fco">lb/MMBtu·ppm</span></label><input id="fco" type="number" step="0.00001" value="0.00236" oninput="calc()"></div>
+        </div>
+        <div class="row2">
+          <div><label>VOC <span class="hint" id="u_fvoc">lb/MMBtu</span></label><input id="fvoc" type="number" step="0.0001" value="0.0021" oninput="calc()"></div>
+          <div><label>PM2.5 <span class="hint" id="u_fpm">lb/MMBtu</span></label><input id="fpm" type="number" step="0.0001" value="0.0066" oninput="calc()"></div>
+        </div>
+        <div class="row2">
+          <div><label>SO2 <span class="hint" id="u_fso2">lb/MMBtu</span></label><input id="fso2" type="number" step="0.0001" value="0.0034" oninput="calc()"></div>
+          <div><label>H2SO4 <span class="hint" id="u_fh2">lb/MMBtu</span></label><input id="fh2" type="number" step="0.0001" value="0.0005" oninput="calc()"></div>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ============ RESULTS COLUMN ============ -->
+  <div>
+    <div class="card">
+      <h2>Turbine snapshot</h2>
+      <div class="kv"><span>Heat input / unit (HHV)</span><span id="o_heat">–</span></div>
+      <div class="kv"><span>Total plant heat input</span><span id="o_theat">–</span></div>
+      <div class="kv"><span>Design efficiency (LHV)</span><span id="o_eff">–</span></div>
+      <div class="kv"><span>Capacity factor (from hours)</span><span id="o_cf">–</span></div>
+      <div class="kv" style="border:none"><span>NSPS subcategory size</span><span id="o_size">–</span></div>
+    </div>
+
+    <details class="card" id="snapcard">
+      <summary>How these numbers are calculated</summary>
+      <div id="snapmath" style="margin-top:8px"></div>
+    </details>
+
+    <div class="card">
+      <h2>Regulatory determinations</h2>
+      <div id="verdicts"></div>
+      <div id="suggest" class="suggestbox"></div>
+    </div>
+
+    <div class="card">
+      <h2>Potential to emit — all units</h2>
+      <table>
+        <thead><tr><th>Pollutant</th><th id="u_lbhr">lb/hr·unit</th><th id="u_tpy">tpy (plant)</th><th>vs limits</th></tr></thead>
+        <tbody id="ptebody"></tbody>
+      </table>
+      <p class="foot">Cells: <b style="color:var(--green)">green</b> below the Title V line · <b style="color:var(--amber)">amber</b> Title V–PSD · <b style="color:var(--red)">red</b> at/above the PSD line. Values follow the unit toggle; the legal thresholds (250 / 100 tpy) are defined in US short tons. CO₂ shown for context only — greenhouse gases cannot trigger PSD on their own.</p>
+    </div>
+
+    <div class="card">
+      <h2>Your permitting lane</h2>
+      <p class="foot" style="margin-top:-2px;margin-bottom:10px">The four boxes are Texas's permitting paths, ordered <b>lightest → heaviest</b>. "Heavier" means more <b>time, cost, engineering analysis, and public scrutiny</b> before you're allowed to build. Your inputs decide which box applies (the highlighted one). You want the <b>lightest lane your emissions allow</b> — which is exactly why adding controls to drop below a threshold can bump you into a lighter, faster lane.</p>
+      <div class="lanes" id="lanes"></div>
+      <p class="foot" id="lanenote"></p>
+      <div style="margin-top:14px">
+        <div style="font-size:12px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">What actually gets "heavier" across the lanes</div>
+        <table class="cmp">
+          <thead><tr><th>&nbsp;</th><th>Permit by Rule<br><span>◀ lightest</span></th><th>Standard Permit</th><th>Minor NSR + Title V</th><th>PSD / NA-NSR + Title V<br><span>heaviest ▶</span></th></tr></thead>
+          <tbody>
+            <tr><td>Typical timeline</td><td>days–weeks</td><td>1–3 months</td><td>6–12 months</td><td>12+ months</td></tr>
+            <tr><td>What you submit</td><td>register a form</td><td>register + meet set caps</td><td>full app + BACT review</td><td>full app + BACT/LAER</td></tr>
+            <tr><td>Air-dispersion modeling</td><td>none</td><td>little / none</td><td>site-specific</td><td>full NAAQS + PSD increments</td></tr>
+            <tr><td>Public notice & comment</td><td>no</td><td>usually no</td><td>sometimes</td><td>yes — required</td></tr>
+            <tr><td>Control-technology proof</td><td>inherently low</td><td>meet permit limits</td><td>BACT</td><td>BACT (or LAER if nonattainment)</td></tr>
+            <tr><td>Title V operating permit</td><td>no</td><td>no</td><td>yes</td><td>yes</td></tr>
+            <tr><td>Best fit</td><td>very small units</td><td>minor sources</td><td>mid-size emitters</td><td>major sources</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ NEXT STEPS ============ -->
+<details class="card" id="nextcard" style="border-left:5px solid var(--navy2)">
+  <summary><h2 id="nexth">Next steps: how to apply</h2></summary>
+  <p class="foot" id="nextintro" style="margin-top:8px;margin-bottom:10px"></p>
+  <div id="nextsteps"></div>
+  <p class="foot" style="margin-top:12px">Submit Texas applications through <a href="https://www3.tceq.texas.gov/steers/" target="_blank" rel="noopener">STEERS</a> (TCEQ's online system). Federal NSPS notifications/reports go through <a href="https://www.epa.gov/electronic-reporting-air-emissions/cedri" target="_blank" rel="noopener">EPA CEDRI</a>. Steps are a plain-language roadmap, not a substitute for a Texas-licensed air consultant.</p>
+</details>
+
+<!-- ============ EXPLANATIONS ============ -->
+<div class="card">
+  <h2>The rules, in plain language</h2>
+
+  <details class="law" open><summary>New Source Review (NSR) — the umbrella</summary><div>
+    Before you build or modify a source of air pollution, the Clean Air Act requires a <b>preconstruction</b> permit. Which kind depends on (a) how much the plant can emit and (b) whether the county already meets air-quality standards. NSR splits into two branches: <b>PSD</b> (in clean/"attainment" areas) and <b>Nonattainment NSR</b> (in dirty areas). Texas runs both programs through TCEQ.
+  </div></details>
+
+  <details class="law"><summary>Attainment vs. nonattainment — why your county matters</summary><div>
+    EPA labels each county "attainment" (meets the air standard for a pollutant) or "nonattainment" (doesn't). <b>Bastrop County / the Austin-Round Rock area is in attainment for ozone and all other criteria pollutants.</b> That puts you in the friendlier <b>PSD</b> branch: a higher major-source trigger (250 tpy), <b>BACT</b> instead of the stricter LAER, and <b>no emission offsets</b>. If you were in a nonattainment area (like San Antonio for ozone), the NOx/VOC triggers drop sharply (100 → 50 → 25 → 10 tpy as severity rises) and you'd have to buy offsetting emission reductions.
+  </div></details>
+
+  <details class="law"><summary>PSD — Prevention of Significant Deterioration (the "major" path)</summary><div>
+    If your plant's <b>potential to emit (PTE)</b> any single regulated pollutant is ≥ <b>250 tpy</b> (the threshold for sources not on EPA's listed-category list — simple-cycle turbines are not listed, so you get 250, not 100), you're a PSD <b>major source</b>. That triggers the heavy path: a formal <b>BACT</b> (Best Available Control Technology) analysis, <b>air-dispersion modeling</b> against the national standards and PSD "increments," public notice, and typically <b>12+ months</b>. For turbines this size, BACT almost always lands on <b>SCR + a CO oxidation catalyst</b> — so you often end up installing them anyway.
+  </div></details>
+
+  <details class="law"><summary>40 CFR Part 60, Subpart KKKKa — Standards of Performance for Stationary Combustion Turbines (the federal turbine standard; always applies)</summary><div>
+    Any new turbine built after <b>Dec 13, 2024</b> falls under <b>40 CFR Part 60, Subpart KKKKa — "Standards of Performance for Stationary Combustion Turbines"</b> (final rule Jan 9, 2026), which replaces the older Subpart KKKK. ("KKKKa" is just this rule's address in the Code of Federal Regulations — the trailing "a" marks the amended version.) The NOx limit depends on <b>size, utilization, and efficiency</b> (natural gas):
+    <ul>
+      <li><b>Large (&gt;850 MMBtu/hr), high utilization (&gt;45% CF): 5 ppm</b> — requires SCR.</li>
+      <li>Large, low utilization: 25 ppm (≥38% eff) or 9 ppm (&lt;38% eff).</li>
+      <li><b>Medium (50–850 MMBtu/hr), high utilization: 15 ppm</b>; low utilization: 25 ppm. A Frame 6B (PG6561B ~471 MMBtu/hr) is medium → <b>15 ppm at baseload, reachable with DLN — no SCR required by NSPS</b>.</li>
+      <li>Small (≤50 MMBtu/hr): 25 ppm.</li>
+    </ul>
+    <b>Key point:</b> meeting the NSPS limit is NOT the same as avoiding PSD. A medium turbine can satisfy NSPS at 15 ppm yet still be a PSD major source on tonnage — that's why SCR often still gets installed. Limits apply at all times (no startup/shutdown exemption); SCR-controlled units need <b>CEMS</b>.
+    <br><br><b>What counts as a "new" turbine? (used / relocated units)</b> The trigger is <b>when you commence construction, modification, or reconstruction</b> after Dec 13, 2024 — not the turbine's manufacture date. Installing brand-new units now is covered. A <b>used or relocated</b> turbine is fact-specific: simply moving and reinstalling an existing unit is generally <b>not</b>, by itself, "construction" of a new affected facility — but it becomes subject if you <b>reconstruct</b> it (replace components costing more than <b>50% of a comparable all-new turbine</b> — 40 CFR 60.15) or <b>modify</b> it so the emission rate increases. Overhauling or uprating an old 6B can cross that 50% line, so run a reconstruction cost analysis and get an applicability determination from TCEQ/EPA. Even if KKKKa doesn't apply, the older Subpart KKKK (or GG) may — and PSD/NSR and Title V apply based on the project's emissions regardless of NSPS vintage.
+  </div></details>
+
+  <details class="law"><summary>Title V — the operating permit (separate from construction)</summary><div>
+    NSR/PSD is your permit to <b>build</b>. <b>Title V</b> (Texas Ch. 122 "Federal Operating Permit") is the permit to <b>operate</b>, and it bundles all your requirements into one document with annual certification. You're a Title V <b>major source</b> if PTE of any pollutant is ≥ <b>100 tpy</b> (lower in nonattainment areas). Being a PSD major source automatically makes you Title V major. You can sometimes stay under 100 tpy with deep controls and enforceable limits — a "synthetic minor" — and skip Title V.
+  </div></details>
+
+  <details class="law"><summary>TCEQ permitting lanes — lightest to heaviest (what the burden scale means)</summary><div>
+    Texas offers several ways to get authorized to build, and they form a <b>spectrum of regulatory burden</b>. "Lightest" and "heaviest" aren't about how clean the plant is — they describe how much <b>effort, time, money, and public process</b> the permit itself demands. Moving up the scale adds, in order: a full engineering application, a formal demonstration of best controls (<b>BACT</b>), <b>air-dispersion modeling</b> to prove you won't violate air standards, a <b>public notice-and-comment</b> period, and a separate <b>Title V operating permit</b>. The lighter lanes skip most of those steps because the emissions are low enough that the state has pre-decided they're acceptable. The whole game is to keep emissions low enough (often via SCR + CO catalyst) to qualify for the lightest lane you can.<br><br>
+    <b>Permit by Rule (PBR) — lightest:</b> register a pre-approved, very-low-emission activity on a simple form; no case-by-case review. Caps are small — usually too small for utility-scale turbines.<br><br>
+    <b>Air Quality Standard Permit for Electric Generating Units (30 TAC §116.601–615):</b> a streamlined registration (Form PI-1S) for EGUs that meet set emission caps; it carries a ~250 tpy site cap, so it's built for <b>minor</b> sources. The fastest viable route for a plant like this <b>if</b> controls keep you below PSD.<br><br>
+    <b>Case-by-case minor NSR permit (30 TAC §116.111):</b> a full but minor-source permit with site-specific BACT and modeling — used when you don't fit a standard permit but stay under the major triggers.<br><br>
+    <b>Federal PSD / Nonattainment NSR + Title V:</b> the major-source path described above.
+  </div></details>
+
+  <details class="law"><summary>BACT vs. LAER, and "potential to emit"</summary><div>
+    <b>PTE</b> is your maximum legal emissions — design capacity × 8,760 hr/yr — unless you accept a <b>federally enforceable limit</b> (e.g., capped hours, or a permit ppm limit). That's why running "only" 8,000 hours doesn't lower PTE on its own. <b>BACT</b> (attainment) and <b>LAER</b> (nonattainment) are the required control levels; LAER is stricter and ignores cost. For natural-gas turbines, BACT is generally SCR (NOx) and an oxidation catalyst (CO).
+  </div></details>
+</div>
+
+<div class="card" style="border-left:5px solid var(--amber)">
+  <h2 style="color:var(--amber)">⚠ Compliance traps &amp; cross-checks</h2>
+  <p class="foot" style="margin-top:-4px;margin-bottom:10px">Things this screen can't catch that have flipped real turbine projects from a light lane into a heavy one. Walk these with a Texas air consultant.</p>
+  <ul style="font-size:13.5px;color:#3a4757;margin:0;padding-left:18px;line-height:1.65">
+    <li><b>You can't split the units.</b> Four turbines under common control on adjacent property are one source (40 CFR 52.21) — PTE aggregates. Co-located facilities you also control (same 2-digit SIC) may aggregate in too.</li>
+    <li><b>Synthetic-minor is the legit lever.</b> Federally-enforceable caps (hours, ppm, or annual tons) can pull PTE below 250 / 100 tpy — but they require CEMS/fuel logging and become violations if exceeded. At true 8,000-hr baseload there's little headroom, so controls do the work, not hour caps.</li>
+    <li><b>Combined-cycle trap (threshold drops 250 → 100).</b> Add a heat-recovery steam generator and the plant can become a listed "fossil-fuel steam electric plant &gt;250 MMBtu/hr" — a 100-tpy PSD category. This tool assumes <b>simple cycle</b>; don't carry its result into a CC design.</li>
+    <li><b>KKKKa capacity factor is enforceable.</b> You can't permit at 25 ppm "low utilization" then run baseload — that flips your subcategory and breaks compliance. And KKKKa <b>removed the startup/shutdown exemption</b>: cold-SCR startup NOx counts and must be engineered for.</li>
+    <li><b>Under 250 tpy ≠ modeling pass.</b> TCEQ will likely require <b>1-hour NO₂ NAAQS</b> dispersion modeling, often the binding constraint — you can clear the tonnage trigger yet still need taller stacks or more control.</li>
+    <li><b>Use the right TCEQ permit.</b> The new (2025) Natural-Gas EGU standard permit <b>excludes turbines</b> (engines only). Turbines use the older EGU Standard Permit (§116.601–615) or case-by-case §116.111 — and it's <b>output-based (lb/MWh)</b>, so convert your ppm design to lb/MWh to test eligibility.</li>
+    <li><b>Staying minor also dodges GHG BACT.</b> ~1.0 M tpy CO₂ can't trigger PSD alone, but if you're PSD-major for NOx/CO you become an "anyway source" and owe greenhouse-gas BACT. Controlling to stay minor removes that obligation too.</li>
+    <li><b>HAP / NESHAP YYYY — low risk.</b> Applies only at a major HAP source (≥10/25 tpy); gas turbines are usually below, and the CO oxidation catalyst also cuts formaldehyde (the pollutant YYYY targets). Confirm your HAP totals anyway.</li>
+    <li><b>Attainment status can change.</b> Bastrop is attainment today (250 tpy, no offsets). A future ozone redesignation would cut NOx/VOC triggers to 100/50/25 tpy and require offsets — consider a Plant-wide Applicability Limit (PAL) for long-term flexibility.</li>
+  </ul>
+  <div style="font-size:12px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.04em;margin:14px 0 4px">Additional gray areas (case-by-case judgment calls)</div>
+  <ul style="font-size:13px;color:#3a4757;margin:0;padding-left:18px;line-height:1.6">
+    <li><b>"Adjacent" &amp; "common control."</b> If these turbines serve/connect to a nearby host facility, its emissions may aggregate with yours — the single-source test turns on functional interrelatedness, not just distance (40 CFR 52.21(b)(6); EPA 2019 "Adjacent" guidance).</li>
+    <li><b>Enforceable PTE limits.</b> Synthetic-minor status only holds if limits (hours, ppm, tonnage) are "practicably enforceable" with real monitoring/recordkeeping — a vague operating assumption won't count (40 CFR 52.21(b)(4)).</li>
+    <li><b>1-hour NO₂ NAAQS modeling.</b> Pass/fail hinges on the NO₂/NOₓ in-stack ratio and the tier chosen (ARM2 vs OLM/PVMRM) and background — defensible choices can flip the result. There is no default in-stack ratio (40 CFR 51 Appendix W; EPA ISR database).</li>
+    <li><b>Condensable PM2.5.</b> The AP-42 PM factor is low-confidence and lumps filterable + condensable; how you estimate condensables affects PM2.5 applicability and modeling (AP-42 §3.1; EPA Method 202).</li>
+    <li><b>BACT level is negotiated.</b> Whether TCEQ requires ~2 ppm SCR vs accepts 5 ppm is a case-by-case cost-per-ton analysis, not a fixed number (40 CFR 52.21(b)(12); EPA top-down BACT).</li>
+    <li><b>SCR's side effects are regulated.</b> SCR oxidizes some SO₂ to SO₃, raising sulfuric-acid mist (H₂SO₄ has a low 7-tpy PSD significance level), and adds ammonia slip (a Texas state contaminant with effects-screening limits) (40 CFR 52.21(b)(23)).</li>
+    <li><b>Startup/shutdown emissions.</b> KKKKa applies "at all times" (no SSM exemption) and cold SCR doesn't control NOₓ — startup spikes must be quantified and may need a Texas planned-MSS authorization (30 TAC 101.222 / 116).</li>
+    <li><b>"Commenced construction" date.</b> When (and what activity) you commence construction locks in which rule versions apply — equipment order vs site prep vs continuous on-site work is a defined but contested point (40 CFR 52.21(b)(9),(11)).</li>
+    <li><b>SIP vs current TCEQ rules.</b> The federally-enforceable text is the EPA-approved SIP version, which can lag the current TCEQ rule on the website.</li>
+    <li><b>"Electric utility" status.</b> Selling to the grid can classify units as EGUs under other federal rules (e.g., NSPS Subpart TTTTa GHG) and shift definitions — confirm the classification.</li>
+  </ul>
+</div>
+
+<p class="foot">
+  <b>Disclaimer.</b> This is a planning screen, not a permit determination or legal advice. Preset turbine specs are nominal ISO values — replace them and the default emission factors (NOx/CO from EPA Method 19; VOC/PM/SO₂ from AP-42 Section 3.1) with your vendor's guaranteed rates and pipeline-gas sulfur spec. Have a Texas-licensed air-permitting professional run the formal applicability analysis and NAAQS modeling before filing.
+  &nbsp;|&nbsp; Sources: EPA NSPS KKKKa Fact Sheet (Jan 2026); 40 CFR 60 Subpart KKKK/KKKKa; EPA Green Book (TX attainment); TCEQ EGU Standard Permit (§116.601–615); GE Vernova & Siemens Energy turbine datasheets (preset specs are nominal ISO simple-cycle, LHV — verify with vendor).
+</p>
+</div>
+
+<script>
+const PRESETS = [
+  {g:"GE Vernova", n:"GE Frame 6B (PG6561B / MS6001B, legacy) — ~40 MW", mw:40, hr:10630},
+  {g:"GE Vernova", n:"GE 6B.03 (uprated) — ~45 MW", mw:45, hr:10216},
+  {g:"GE Vernova", n:"GE Frame 5 (MS5001P) — ~26 MW", mw:26, hr:12600},
+  {g:"GE Vernova", n:"GE Frame 7EA (MS7001EA) — ~85 MW", mw:85, hr:10480},
+  {g:"GE Vernova", n:"GE Frame 6F.03 — ~88 MW", mw:88, hr:9800},
+  {g:"GE Vernova", n:"GE Frame 7F.05 — ~239 MW", mw:239, hr:8900},
+  {g:"Siemens Energy", n:"Siemens SGT-600 — ~25 MW", mw:25, hr:9980},
+  {g:"Siemens Energy", n:"Siemens SGT-700 — ~33 MW", mw:33, hr:9367},
+  {g:"Siemens Energy", n:"Siemens SGT-750 — ~38 MW", mw:38, hr:8811},
+  {g:"Siemens Energy", n:"Siemens SGT-800 — ~62 MW", mw:62, hr:8302},
+  {g:"Siemens Energy", n:"Siemens SGT5-2000E — ~198 MW", mw:198, hr:9083},
+  {g:"Siemens Energy", n:"Siemens SGT6-5000F — ~260 MW", mw:260, hr:8531},
+  {g:"Siemens Energy", n:"Siemens SGT5-4000F — ~329 MW", mw:329, hr:8322},
+  {g:"Other", n:"Custom (enter values)", mw:null, hr:null},
+];
+const sel=document.getElementById('preset');
+const _grp={};
+PRESETS.forEach((p,i)=>{
+  const gn=p.g||'Other';
+  if(!_grp[gn]){const og=document.createElement('optgroup');og.label=gn;sel.appendChild(og);_grp[gn]=og;}
+  const o=document.createElement('option');o.value=i;o.textContent=p.n;_grp[gn].appendChild(o);
+});
+function applyPreset(){
+  const p=PRESETS[+sel.value];
+  if(p.mw){document.getElementById('mw').value=p.mw;document.getElementById('hr').value=p.hr;}
+  calc();
+}
+function syncCtrl(){
+  const ns=document.getElementById('noxsel'),ni=document.getElementById('noxppm');
+  if(ns.value==='custom'){ni.style.display='block';} else {ni.style.display='none';ni.value=ns.value;}
+  const cs=document.getElementById('cosel'),ci=document.getElementById('coppm');
+  if(cs.value==='custom'){ci.style.display='block';} else {ci.style.display='none';ci.value=cs.value;}
+}
+const $=id=>document.getElementById(id);
+const num=id=>parseFloat($(id).value)||0;
+const fmt=(v,d=1)=>v.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+
+// ---- Unit system (US <-> Metric/SI) ----
+let UNIT='us';
+const KJ=1.055056, MWTH=0.29307107, TON=0.90718474, KG=0.45359237, NGJ=429.923; // conversion constants
+const FCONV={hr:KJ,fnox:NGJ,fco:NGJ,fvoc:NGJ,fpm:NGJ,fso2:NGJ,fh2:NGJ};          // input field <-> SI
+function applyUnitLabels(sys){
+  $('u_hr').textContent = sys==='si'?'kJ/kWh':'Btu/kWh';
+  const fp=sys==='si'?'ng/J·ppm':'lb/MMBtu·ppm', fm=sys==='si'?'ng/J':'lb/MMBtu';
+  $('u_fnox').textContent=fp; $('u_fco').textContent=fp;
+  $('u_fvoc').textContent=fm; $('u_fpm').textContent=fm; $('u_fso2').textContent=fm; $('u_fh2').textContent=fm;
+  $('btn-us').classList.toggle('active',sys==='us'); $('btn-si').classList.toggle('active',sys==='si');
+}
+function setUnits(sys){
+  if(sys===UNIT) return;
+  for(const id in FCONV){const el=$(id); let v=parseFloat(el.value)||0; v=(sys==='si')?v*FCONV[id]:v/FCONV[id]; el.value=+v.toPrecision(6);}
+  UNIT=sys; applyUnitLabels(sys); calc();
+}
+
+// ---- Remember settings between visits (localStorage) ----
+const PERSIST=['preset','mw','units','hr','hhv','hours','status','noxsel','noxppm','cosel','coppm','fnox','fco','fvoc','fpm','fso2','fh2'];
+function saveState(){
+  try{const o={unit:UNIT,f:{}}; PERSIST.forEach(id=>{const el=$(id); if(el) o.f[id]=el.value;}); localStorage.setItem('turbinePermitTool',JSON.stringify(o));}catch(e){}
+}
+function loadState(){
+  try{const raw=localStorage.getItem('turbinePermitTool'); if(!raw) return false; const o=JSON.parse(raw);
+    PERSIST.forEach(id=>{const el=$(id); if(el && o.f && o.f[id]!==undefined) el.value=o.f[id];});
+    UNIT=(o.unit==='si')?'si':'us'; applyUnitLabels(UNIT); syncCtrl(); calc(); return true;
+  }catch(e){return false;}
+}
+
+function calc(){
+  const SI = UNIT==='si';
+  const cf_in = id => SI ? num(id)/FCONV[id] : num(id);   // convert field to canonical US units
+  const mw=num('mw'),units=num('units'),hhv=num('hhv'),hours=num('hours');
+  const hr=cf_in('hr');
+  const noxppm=$('noxsel').value==='custom'?num('noxppm'):parseFloat($('noxsel').value);
+  const coppm=$('cosel').value==='custom'?num('coppm'):parseFloat($('cosel').value);
+  const fnox=cf_in('fnox'),fco=cf_in('fco'),fvoc=cf_in('fvoc'),fpm=cf_in('fpm'),fso2=cf_in('fso2'),fh2=cf_in('fh2');
+  const uT = v => SI ? v*TON : v;            // short tons -> display (tonnes)
+  const UL = SI ? 't/yr' : 'tpy';            // tonnage unit label
+
+  const heat = mw*1000*hr/1e6*hhv;           // MMBtu/hr HHV per unit
+  const theat = heat*units;
+  const eff = hr>0 ? 3412/hr*100 : 0;        // LHV %
+  const effHHV = hhv>0 ? eff/hhv : eff;      // HHV % (KKKKa efficiency split is HHV-based)
+  const cf = hours/8760*100;
+  const sizeTxt = heat>850 ? "Large (>850 MMBtu/hr)" : heat>50 ? "Mid (50–850 MMBtu/hr)" : "Small (≤50 MMBtu/hr)";
+
+  $('o_heat').textContent = SI ? fmt(heat*MWTH)+" MW(th)" : fmt(heat)+" MMBtu/hr";
+  $('o_theat').textContent = SI ? fmt(theat*MWTH)+" MW(th)" : fmt(theat)+" MMBtu/hr";
+  $('u_lbhr').textContent = SI ? "kg/hr·unit" : "lb/hr·unit";
+  $('u_tpy').textContent = (SI ? "t/yr" : "tpy") + " (plant)";
+  $('snapmath').innerHTML = `<ol class="steps" style="font-size:12.5px;padding-left:18px">`
+    + `<li><b>Heat input / unit</b> = MW × 1,000 × heat-rate(Btu/kWh) ÷ 1,000,000 × HHV factor<br>= ${fmt(mw,1)} × 1,000 × ${fmt(hr,0)} ÷ 1,000,000 × ${fmt(hhv,3)} = <b>${fmt(heat,1)} MMBtu/hr (HHV)</b>${SI?` = ${fmt(heat*MWTH,1)} MW(th)`:''}</li>`
+    + `<li><b>Total plant heat input</b> = ${fmt(heat,1)} × ${fmt(units,0)} units = <b>${fmt(theat,1)} MMBtu/hr</b>${SI?` = ${fmt(theat*MWTH,1)} MW(th)`:''}</li>`
+    + `<li><b>Efficiency (LHV)</b> = 3,412 ÷ heat-rate = 3,412 ÷ ${fmt(hr,0)} = <b>${fmt(eff,1)}%</b> &nbsp;(HHV basis ${fmt(effHHV,1)}%)</li>`
+    + `<li><b>Capacity factor</b> = operating hours ÷ 8,760 = ${fmt(hours,0)} ÷ 8,760 = <b>${fmt(cf,1)}%</b></li>`
+    + `<li><b>NSPS size class</b>: ${fmt(heat,0)} MMBtu/hr is ${heat>850?'&gt;850':heat>50?'between 50 and 850':'≤50'} MMBtu/hr → <b>${sizeTxt}</b></li>`
+    + `</ol><p class="foot" style="margin-top:6px">Heat rate is shown in Btu/kWh (the basis for the 3,412 and 1,000,000 constants); the snapshot above follows your unit toggle. The 1.108 factor converts natural-gas LHV→HHV.</p>`;
+  $('o_eff').textContent=fmt(eff)+"%";
+  $('o_cf').textContent=fmt(cf)+"% ("+fmt(hours,0)+" hr)";
+  $('o_size').textContent=sizeTxt;
+
+  // tpy helper
+  const tpy=(lbmmbtu)=>lbmmbtu*heat*hours*units/2000;
+  const lbhr=(lbmmbtu)=>lbmmbtu*heat;
+  const rows=[
+    {k:"NOx", lb:fnox*noxppm, t:tpy(fnox*noxppm), crit:true},
+    {k:"CO", lb:fco*coppm, t:tpy(fco*coppm), crit:true},
+    {k:"VOC", lb:fvoc, t:tpy(fvoc), crit:true},
+    {k:"PM2.5 / PM10", lb:fpm, t:tpy(fpm), crit:true},
+    {k:"SO2", lb:fso2, t:tpy(fso2), crit:true},
+    {k:"H2SO4 mist", lb:fh2, t:tpy(fh2), crit:true},
+    {k:"CO2 (info)", lb:117, t:tpy(117), crit:false},
+  ];
+  const tb=$('ptebody'); tb.innerHTML='';
+  let maxCrit=0, maxNoxVoc=0;
+  rows.forEach(r=>{
+    if(r.crit){maxCrit=Math.max(maxCrit,r.t);}
+    if(r.k==="NOx"||r.k==="VOC"){maxNoxVoc=Math.max(maxNoxVoc,r.t);}
+    const cls = !r.crit?'' : r.t>=250?'cellr':r.t>=100?'cella':'cellg';
+    const flag = !r.crit?'—' : r.t>=250?`<span class="pill bad">≥${fmt(uT(250),0)}</span>`:r.t>=100?`<span class="pill warn">≥${fmt(uT(100),0)}</span>`:`<span class="pill ok">&lt;${fmt(uT(100),0)}</span>`;
+    const perhr=r.lb*heat;                       // lb/hr per unit (canonical US)
+    const lbD = SI ? perhr*KG : perhr;           // kg/hr if metric
+    const tD = SI ? r.t*TON : r.t;               // t/yr if metric
+    tb.innerHTML+=`<tr><td>${r.k}</td><td>${fmt(lbD,2)}</td><td class="tpy ${cls}">${fmt(tD)}</td><td>${flag}</td></tr>`;
+  });
+
+  // thresholds
+  const st=$('status').value;
+  const naThresh = st==='na_mod'?100 : st==='na_ser'?50 : st==='na_sev'?25 : null;
+  const isAtt = st==='att';
+  // major NSR?
+  let majorNSR=false, nsrType='';
+  if(isAtt){ majorNSR = maxCrit>=250; nsrType='PSD'; }
+  else { majorNSR = (maxNoxVoc>=naThresh) || (maxCrit>=250); nsrType='Nonattainment NSR'; }
+  const tvThresh = isAtt?100:Math.min(100,naThresh);
+  const titleV = maxCrit>=tvThresh || (!isAtt && maxNoxVoc>=naThresh);
+
+  // KKKKa (new NG turbine table, 40 CFR 60 subpart KKKKa, Jan 2026)
+  let req, scrMandated=false;
+  if(heat>850){ req = cf>45?5 : (effHHV>=38?25:9); scrMandated = cf>45; }
+  else if(heat>50){ req = cf>45?15:25; }
+  else { req=25; }
+  const kk = noxppm<=req;
+
+  // verdicts
+  const V=$('verdicts'); V.innerHTML='';
+  const add=(cls,h,p)=>{V.innerHTML+=`<div class="verdict ${cls}"><h3>${h}</h3><p>${p}</p></div>`;};
+  add(kk?'v-ok':'v-bad',
+     `NSPS Subpart KKKKa (Standards of Performance for Stationary Combustion Turbines): NOx limit ${req} ppm — ${kk?'met ✓':'NOT met ✗'}`,
+     `New unit (post-2024), ${sizeTxt.split(' ')[0].toLowerCase()} subcategory. At ${fmt(cf)}% capacity factor and ${fmt(eff)}% efficiency, the KKKKa NOx limit is <b>${req} ppm</b>; you selected ${fmt(noxppm,1)} ppm. ${scrMandated?'Large + high-utilization → SCR is mandated by NSPS (5 ppm) and CEMS is required.':`NSPS does <b>not</b> mandate SCR for this turbine — but SCR may still be needed to stay under the ${fmt(uT(250),0)} ${UL} PSD line (see below).`}`);
+  add(majorNSR?'v-bad':'v-ok',
+     `${nsrType}: ${majorNSR?'MAJOR source':'minor source'}`,
+     majorNSR
+       ? `Max pollutant PTE is ${fmt(uT(maxCrit))} ${UL} ≥ the ${fmt(uT(isAtt?250:naThresh),0)} ${UL} trigger → full ${nsrType} review (BACT${isAtt?'':'/LAER'}, dispersion modeling, public notice, ~12+ months).`
+       : `All pollutants stay under the ${fmt(uT(isAtt?250:naThresh),0)} ${UL} trigger → you avoid the heavy ${nsrType} path.`);
+  const gray = maxCrit>=tvThresh*0.95 && maxCrit<=tvThresh*1.05;   // ~95-105 tpy band
+  if(gray){
+    add('v-warn',
+      `Title V: BORDERLINE — max pollutant ≈ ${fmt(uT(maxCrit))} ${UL} (within 5% of ${fmt(uT(tvThresh),0)} ${UL})`,
+      `You're in the gray zone right at the ${fmt(uT(tvThresh),0)} ${UL} line. The ppm→tpy conversion factor swings ~5% (Method 19 ≈ 0.00368 vs AP-42 ≈ 0.0039), which alone can flip this result. Don't rely on it — design to a clear margin (e.g. ~2 ppm NOx) or pin the answer with vendor stack-test / CEMS data before assuming you can skip Title V.`);
+  } else {
+    add(titleV?'v-warn':'v-ok',
+       `Title V operating permit: ${titleV?'REQUIRED (major)':'not triggered (minor)'}`,
+       titleV
+         ? `At least one pollutant ≥ ${fmt(uT(tvThresh),0)} ${UL}. Plan for a Title V (Ch. 122) operating permit in addition to the construction authorization.`
+         : `All pollutants below ${fmt(uT(tvThresh),0)} ${UL} — a potential "synthetic minor" if you accept enforceable limits, avoiding Title V.`);
+  }
+
+  // --- auto-suggest target control levels ---
+  (function(){
+    const denomN=fnox*heat*hours*units/2000, denomC=fco*heat*hours*units/2000;       // tpy per ppm
+    const fixedMax=Math.max(fvoc,fpm,fso2,fh2)*heat*hours*units/2000;                 // tpy of worst fixed pollutant
+    const cap=(thr,denom)=> denom<=0?'—':(thr/denom>50?'&gt;50 ppm (not limiting)':fmt(thr/denom,1)+' ppm');
+    const line=thr=> fixedMax>=thr
+      ? `a fixed pollutant already exceeds ${fmt(uT(thr),0)} ${UL} — NOx/CO control alone can't get under it`
+      : `NOx ≤ <b>${cap(thr,denomN)}</b> and CO ≤ <b>${cap(thr,denomC)}</b>`;
+    const nsrThr=isAtt?250:naThresh;
+    let h=`<b>Target control levels</b> — per-pollutant caps to reach a lighter lane:<br>`;
+    if(tvThresh===nsrThr){
+      h+=`• Below ${nsrType} major / Title V (${fmt(uT(nsrThr),0)} ${UL}): ${line(nsrThr)}`;
+    } else {
+      h+=`• Below ${nsrType} major (${fmt(uT(nsrThr),0)} ${UL}): ${line(nsrThr)}<br>`;
+      h+=`• Below Title V (${fmt(uT(tvThresh),0)} ${UL}): ${line(tvThresh)}`;
+    }
+    h+=`<br><span style="color:#5b6b7b">VOC/PM/SO₂/H₂SO₄ are fixed (not ppm-controlled); round caps down for margin.</span>`;
+    $('suggest').innerHTML=h;
+  })();
+
+  // lanes
+  let lane = majorNSR?3 : titleV?2 : 1;   // 0 PBR,1 StdPermit,2 minorNSR+TV,3 PSD+TV
+  const LANES=[
+    {t:"Permit by Rule",tag:"Lightest",li:["Pre-approved, very low emissions","Form PI-7 registration","Usually too small for utility turbines"]},
+    {t:"TCEQ EGU Standard Permit",tag:"Streamlined",li:["30 TAC §116.601–615, Form PI-1S","~250 tpy site cap (minor)","Fastest viable route if below PSD"]},
+    {t:"Minor NSR + Title V",tag:"Moderate",li:["Case-by-case §116.111 w/ BACT","+ Ch.122 operating permit","Site-specific modeling"]},
+    {t:"PSD / NA-NSR + Title V",tag:"Heaviest",li:["Major-source review + BACT/LAER","Full NAAQS & increment modeling","Public notice, ~12+ months"]},
+  ];
+  const BWORD=["Lightest","Light–moderate","Moderate–heavy","Heaviest"];
+  const L=$('lanes'); L.innerHTML='';
+  LANES.forEach((x,i)=>{
+    const active=i===lane, lvl=i+1;
+    let meter='<div class="meter">';
+    for(let s=1;s<=4;s++){meter+=`<div class="seg ${s<=lvl?'on'+lvl:''}"></div>`;}
+    meter+=`</div><div class="burden">Burden: ${BWORD[i]} (${lvl}/4)</div>`;
+    L.innerHTML+=`<div class="lane ${active?'active':(i<lane?'dim':'')}"><span class="tag">${x.tag}</span><h4>${active?'➤ ':''}${x.t}</h4>${meter}<ul>${x.li.map(l=>`<li>${l}</li>`).join('')}</ul></div>`;
+  });
+  const notes=[
+    "PBR rarely fits turbines of this size.",
+    "Recommended lane: register under the TCEQ EGU Standard Permit. NSPS KKKKa still applies.",
+    "Recommended lane: minor NSR construction permit plus a Title V operating permit. NSPS KKKKa still applies.",
+    "Recommended lane: full major-source review plus Title V — the long path. Adding SCR + CO oxidation catalyst is usually what pulls a baseload plant back down into the minor lanes.",
+  ];
+  $('lanenote').innerHTML="<b>"+notes[lane]+"</b>";
+  renderSteps(lane, titleV, majorNSR, isAtt);
+  saveState();
+}
+// ---- Next-steps (how to apply) ----
+const LK={
+ steers:"https://www3.tceq.texas.gov/steers/",
+ core:"https://www.tceq.texas.gov/downloads/permitting/central-registry-docs/10400-core-data-form-instructions.pdf",
+ pi1s:"https://www.tceq.texas.gov/downloads/permitting/air/forms/nsr/10370.pdf",
+ egu:"https://www.tceq.texas.gov/permitting/air/newsourcereview/combustion/egu_sp.html",
+ pi1:"https://www.tceq.texas.gov/permitting/air/guidance/newsourcereview/nsrapp-tools.html",
+ turb:"https://www.tceq.texas.gov/permitting/air/guidance/newsourcereview/turbines/nsrauth_turb.html",
+ pbr:"https://www.tceq.texas.gov/permitting/air/permitbyrule/air_pbr_index.html",
+ pn:"https://www.tceq.texas.gov/permitting/air/bilingual/publicnotice-airpermits",
+ tv:"https://www.tceq.texas.gov/permitting/air/titlev/apps_timelines.html",
+ nsps:"https://www.epa.gov/stationary-sources-air-pollution/stationary-gas-and-combustion-turbines-new-source-performance",
+ cedri:"https://www.epa.gov/electronic-reporting-air-emissions/cedri"
+};
+const a=(u,t)=>`<a href="${u}" target="_blank" rel="noopener">${t}</a>`;
+function olist(arr){return '<ol class="steps">'+arr.map(x=>`<li>${x}</li>`).join('')+'</ol>';}
+function grp(title){return `<div class="stepgrp">${title}</div>`;}
+
+function renderSteps(lane, titleV, majorNSR, isAtt){
+  const laneName=["Permit by Rule","TCEQ EGU Standard Permit","Minor NSR permit + Title V","PSD / Nonattainment-NSR + Title V"][lane];
+  $('nexth').textContent="Next steps: how to apply — "+laneName;
+  $('nextintro').innerHTML=`Below is the ordered roadmap for the <b>${laneName}</b> lane your inputs landed in, plus the federal steps that always apply. Open each linked form/page in a new tab.`;
+  const start=[
+    `<b>Set up STEERS & your Core Data Form.</b> Create a ${a(LK.steers,"STEERS account")} (TCEQ's online filing system) and complete the ${a(LK.core,"Core Data Form (TCEQ-10400)")} to get your Regulated Entity & Customer numbers.`,
+    `<b>Finalize your emissions basis.</b> Lock in vendor-guaranteed NOx/CO/VOC/PM rates and compute plant-wide PTE (this tool's table) — every application hinges on these numbers.`
+  ];
+  let constr=[];
+  if(lane===0){
+    constr=[
+      `<b>Confirm PBR eligibility.</b> Check the unit against the ${a(LK.pbr,"Permit by Rule index")} (turbine/engine PBR 106.512). Most utility-scale turbines exceed PBR caps — if so, move to the Standard Permit lane.`,
+      `<b>Register the PBR</b> electronically and pay the fee. Keep records demonstrating you stay within the PBR limits.`
+    ];
+  } else if(lane===1){
+    constr=[
+      `<b>Confirm Standard-Permit eligibility.</b> Verify your design meets the ${a(LK.egu,"EGU Standard Permit (30 TAC 116.601–615)")} output-based caps (lb/MWh) and the ~250 tpy site cap. See ${a(LK.turb,"Types of Authorization for Turbines")}.`,
+      `<b>Complete Form PI-1S</b> — the ${a(LK.pi1s,"Registration for a Standard Permit (TCEQ-10370)")} — with your emissions and unit data.`,
+      `<b>Submit & pay.</b> File the PI-1S and Core Data Form in ${a(LK.steers,"STEERS")} and pay the registration fee. Maintain records on site.`
+    ];
+  } else if(lane===2){
+    constr=[
+      `<b>Build the technical application.</b> Prepare emission calculations, process flow diagrams, Table 1(a), a <b>BACT</b> analysis (SCR + CO oxidation catalyst), and <b>air-dispersion modeling</b> against the NAAQS (the 1-hour NO₂ standard is usually binding).`,
+      `<b>Complete Form PI-1.</b> Use the ${a(LK.pi1,"General Application (Form PI-1) + NSR application tools")} (TCEQ-10252) and attach the Core Data Form.`,
+      `<b>Submit & sign in ${a(LK.steers,"STEERS")}</b> and pay the fee. TCEQ has 61 days to deem it administratively complete.`,
+      `<b>Public notice (if required).</b> TCEQ sends you a ${a(LK.pn,"public-notice package")}; publish the NORI in a newspaper, post site signs, and run the 30-day comment period. Don't draft your own notice.`,
+      `<b>Respond to technical review.</b> Answer TCEQ's Notices of Deficiency promptly to keep the review moving toward permit issuance.`
+    ];
+  } else {
+    constr=[
+      `<b>Hold a pre-application meeting</b> with TCEQ Air Permits Division (and expect EPA Region 6 coordination) to scope the PSD review.`,
+      `<b>Prepare the full PSD application.</b> ${a(LK.pi1,"Form PI-1")} plus a top-down <b>BACT</b> analysis, <b>full NAAQS + PSD-increment dispersion modeling</b>, additional-impacts analysis (soils/vegetation/visibility) and a Class I area check. ${isAtt?"":"<b>Nonattainment:</b> also secure emission-reduction <b>offsets</b> and meet LAER."} If you're PSD-major you also owe <b>greenhouse-gas BACT</b> (efficiency).`,
+      `<b>Submit & sign in ${a(LK.steers,"STEERS")}</b>; pay fees.`,
+      `<b>Public participation.</b> Full ${a(LK.pn,"public notice")} (NORI/NAPD), at least a 30-day comment period, and a public meeting if requested — plan ~12+ months overall.`,
+      `<b>Respond to NODs & draft permit.</b> Work through TCEQ's technical review to a draft and final permit.`
+    ];
+  }
+  const nsps=[
+    `<b>File the initial notification</b> that the turbines are subject to NSPS Subpart KKKKa (built after 12/13/2024). See ${a(LK.nsps,"EPA's turbine NSPS page")}.`,
+    `<b>Install & certify NOx (and any CO) CEMS</b> as required, and conduct initial performance testing at >70% load.`,
+    `<b>Set up electronic reporting.</b> Register in ${a(LK.cedri,"EPA CEDRI (via CDX)")} and submit notifications and the semiannual reports there.`
+  ];
+  const tv=[
+    `<b>Plan for Title V</b> — you're a major source. After startup you have <b>12 months</b> to file the Federal Operating Permit application (Form OP-1) with TCEQ APD, your regional office, and EPA Region 6. See ${a(LK.tv,"FOP application procedures & timelines")}.`,
+    `<b>Use the application shield.</b> A timely, complete OP-1 lets you keep operating until TCEQ takes final action — so don't miss the 12-month deadline.`
+  ];
+  let html = grp("Step 1 — Get set up (all lanes)")+olist(start)
+           + grp("Step 2 — Construction authorization: "+laneName)+olist(constr)
+           + grp("Step 3 — Federal NSPS Subpart KKKKa: Standards of Performance for Stationary Combustion Turbines (always applies)")+olist(nsps);
+  if(titleV) html += grp("Step 4 — Title V operating permit (required)")+olist(tv);
+  $('nextsteps').innerHTML=html;
+}
+
+function printPDF(){window.print();}
+let _saved=[];
+window.addEventListener('beforeprint',()=>{
+  _saved=[...document.querySelectorAll('details.law, details#nextcard')].map(d=>d.open);
+  document.querySelectorAll('details.law, details#nextcard').forEach(d=>d.open=true);
+});
+window.addEventListener('afterprint',()=>{
+  document.querySelectorAll('details.law, details#nextcard').forEach((d,i)=>d.open=_saved[i]);
+});
+syncCtrl();
+if(!loadState()){ applyPreset(); }
+</script>
+</body>
+</html>
