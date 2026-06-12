@@ -102,6 +102,47 @@
   .foot{font-size:11.5px;color:#8a99a8;margin-top:14px;line-height:1.55}
   .adv summary{cursor:pointer;font-size:12px;color:var(--navy2);font-weight:600;margin-top:6px}
   .badgerow{margin:2px 0 10px}
+
+  /* ===== Dashboard tabs + Overview (simple) styling ===== */
+  .tabbar{display:flex;gap:4px;background:var(--navy);padding:0 20px}
+  .tabbtn{background:transparent;border:none;color:#cfe0f5;font-size:14px;font-weight:700;padding:13px 20px;cursor:pointer;border-bottom:3px solid transparent}
+  .tabbtn:hover{color:#fff}
+  .tabbtn.active{color:#fff;border-bottom-color:#fff}
+  .simplewrap{max-width:1040px;margin:0 auto;padding:22px}
+  .s-grid{display:grid;grid-template-columns:330px 1fr;gap:18px}
+  @media(max-width:820px){.s-grid{grid-template-columns:1fr}}
+  .s-card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+  .s-card h3{margin:0 0 12px;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--navy);border-bottom:2px solid var(--line);padding-bottom:8px}
+  .s-field{margin-bottom:14px}
+  .s-field label{display:block;font-size:13px;font-weight:700;color:var(--mut);margin-bottom:5px}
+  .s-field select,.s-field input{width:100%;padding:10px;border:1px solid #c7d0da;border-radius:7px;font-size:14px;background:#fff}
+  .s-hero{border-radius:12px;padding:22px 24px;color:#fff;margin-bottom:16px}
+  .s-hero h2{margin:0 0 6px;font-size:12px;letter-spacing:.07em;text-transform:uppercase;opacity:.85;font-weight:700}
+  .s-hero .lane{font-size:25px;font-weight:800;margin:0 0 8px;line-height:1.15}
+  .s-hero p{margin:0;font-size:15px;opacity:.96;line-height:1.5}
+  .s-kpi{display:flex;gap:12px;flex-wrap:wrap}
+  .s-kpi .box{flex:1;min-width:130px;background:#f6f9fc;border:1px solid var(--line);border-radius:9px;padding:12px}
+  .s-kpi .box .v{font-size:17px;font-weight:800;color:var(--navy)} .s-kpi .box .l{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.03em;margin-top:2px}
+  .s-meter{display:flex;gap:4px;margin:6px 0 2px}
+  .s-seg{height:9px;flex:1;border-radius:3px;background:#e3e8ee}
+  .s-list{margin:8px 0 0;padding-left:18px;font-size:14px;color:#3a4757;line-height:1.65}
+  .s-tip{border-radius:8px;padding:12px 14px;font-size:13.5px;margin-top:14px;line-height:1.5}
+  .s-tip.go{background:var(--greenbg);border-left:4px solid var(--green);color:#1b5e34}
+  .s-tip.warn{background:var(--amberbg);border-left:4px solid var(--amber);color:#7a5200}
+  table.s-emit{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:4px}
+  table.s-emit th,table.s-emit td{padding:7px 9px;text-align:left;border-bottom:1px solid var(--line)}
+  table.s-emit th{background:var(--navy);color:#fff;font-size:11px;text-transform:uppercase;letter-spacing:.03em}
+  table.s-emit td:nth-child(2){text-align:right;font-weight:700}
+  .s-badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11.5px;font-weight:700}
+  .s-badge.ok{background:var(--greenbg);color:var(--green)} .s-badge.warn{background:var(--amberbg);color:var(--amber)} .s-badge.bad{background:var(--redbg);color:var(--red)} .s-badge.info{background:#eef2f7;color:var(--mut)}
+  details#glosscard{margin-top:18px}
+  details#glosscard summary{list-style:none;cursor:pointer;font-weight:700;color:var(--navy);font-size:14px;display:flex;justify-content:space-between;align-items:center}
+  details#glosscard summary::-webkit-details-marker{display:none}
+  details#glosscard summary::after{content:'\25B8 show';font-size:12px;color:var(--navy2)}
+  details#glosscard[open] summary::after{content:'\25BE hide'}
+  .gloss{margin:12px 0 0;font-size:13.5px;line-height:1.55;color:#3a4757}
+  .gloss div{padding:6px 0;border-bottom:1px dashed var(--line)}
+  .gloss b{color:var(--navy)}
 </style>
 </head>
 <body>
@@ -112,9 +153,73 @@
   </div>
   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
     <div class="unittoggle"><button id="btn-us" class="utg active" onclick="setUnits('us')">US units</button><button id="btn-si" class="utg" onclick="setUnits('si')">Metric (SI)</button></div>
+    <button id="btn-share" class="printbtn" onclick="copyShareLink()">🔗 Copy share link</button>
     <button class="printbtn" onclick="printPDF()">🖨 Print / Save as PDF</button>
   </div>
 </header>
+<div class="tabbar">
+  <button id="tabb-simple" class="tabbtn active" onclick="showTab('simple')">Overview</button>
+  <button id="tabb-tech" class="tabbtn" onclick="showTab('tech')">Technical details</button>
+</div>
+<div id="tab-simple" class="simplewrap">
+  <div class="s-grid">
+    <div>
+    <div class="s-card">
+      <h3>Your project</h3>
+      <div class="s-field"><label>Turbine</label><select id="s_preset" onchange="simpleApply()"></select></div>
+      <div class="s-field"><label>Number of units</label><input id="s_units" type="number" min="1" value="4" oninput="simpleApply()"></div>
+      <div class="s-field"><label>How will it run?</label><select id="s_profile" onchange="simpleApply()"><option value="8000">Baseload — runs most of the year (8,000+ hr/yr)</option><option value="2000">Peaking — runs occasionally (~2,000 hr/yr)</option></select></div>
+      <div class="s-field"><label>NOx control</label><select id="s_nox" onchange="simpleApply()"><option value="15">Combustion controls only &mdash; 15 ppm (older turbines)</option><option value="9">Combustion controls only &mdash; 9 ppm (newer turbines)</option><option value="25">Water / steam injection &mdash; 25 ppm</option><option value="5" selected>SCR added &mdash; 5 ppm</option><option value="3">SCR, well-controlled &mdash; 3 ppm</option><option value="2">SCR, best achievable &mdash; 2 ppm</option></select></div><div class="s-field"><label>CO control</label><select id="s_co" onchange="simpleApply()"><option value="25" selected>Uncontrolled &mdash; 25 ppm</option><option value="9">Combustion tuning &mdash; 9 ppm</option><option value="4">Oxidation catalyst &mdash; 4 ppm</option><option value="2">Oxidation catalyst, best &mdash; 2 ppm</option></select><div class="hint" style="margin-top:6px">SCR is an add-on that lowers NOx; an oxidation catalyst lowers CO. Lower ppm means lower emissions.</div></div>
+      <div class="s-field"><label>Location air quality</label><select id="s_loc" onchange="simpleApply()"><option value="att">Clean-air (attainment) area — e.g. Bastrop, TX</option><option value="na_mod">Smoggy (ozone nonattainment) area</option></select></div>
+    </div>
+    <details id="glosscard" class="s-card">
+    <summary>Key terms (plain English)</summary>
+    <div class="gloss">
+      <div><b>PSD</b> &mdash; Prevention of Significant Deterioration: the heaviest federal air permit, required for large plants in clean-air areas (~12+ months).</div>
+      <div><b>NSR</b> &mdash; New Source Review: the umbrella program for getting an air permit before you build.</div>
+      <div><b>BACT</b> &mdash; Best Available Control Technology: the strong emission controls a major source must install (for turbines, usually SCR + an oxidation catalyst).</div>
+      <div><b>Title V</b> &mdash; a separate federal operating permit (permission to run the plant), required once emissions are large.</div>
+      <div><b>NSPS (Subpart KKKKa)</b> &mdash; the federal emission standard every new turbine must meet, regardless of permit lane.</div>
+      <div><b>Major source</b> &mdash; a plant big enough (over the tons-per-year limit) to need the heavy permits.</div>
+      <div><b>Potential to emit (PTE)</b> &mdash; the most a plant could emit running flat-out all year; permits are based on this.</div>
+      <div><b>tpy</b> &mdash; tons per year of a pollutant. &nbsp; <b>ppm</b> &mdash; parts per million in the exhaust (lower = cleaner).</div>
+      <div><b>NOx</b> &mdash; nitrogen oxides (smog-forming). &nbsp; <b>CO</b> &mdash; carbon monoxide.</div>
+      <div><b>SCR</b> &mdash; Selective Catalytic Reduction: an add-on that removes NOx. &nbsp; <b>Oxidation catalyst</b> &mdash; an add-on that removes CO.</div>
+      <div><b>Attainment / nonattainment</b> &mdash; whether the local area already meets air-quality standards (attainment = cleaner air, easier permitting).</div>
+    </div>
+  </details>
+    </div>
+    <div>
+      <div class="s-hero" id="s_hero"><h2>Permitting outlook</h2><div class="lane" id="s_lane">&mdash;</div><p id="s_summary"></p></div>
+      <div class="s-card">
+        <h3>What this means</h3>
+        <div class="s-kpi">
+          <div class="box"><div class="v" id="s_time">&mdash;</div><div class="l">Typical timeline</div></div>
+          <div class="box"><div class="v" id="s_review">&mdash;</div><div class="l">Review type</div></div>
+          <div class="box"><div class="v" id="s_op">&mdash;</div><div class="l">Operating permit</div></div><div class="box"><div class="v" id="s_cost">&mdash;</div><div class="l">Relative cost</div></div>
+        </div>
+        <div style="margin-top:14px;font-size:12px;font-weight:700;color:var(--mut)">Effort &amp; burden</div>
+        <div class="s-meter" id="s_meter"></div>
+        <div id="s_burden" style="font-size:12px;font-weight:700;color:var(--mut)"></div>
+        <ul class="s-list" id="s_needs"></ul>
+        <div class="s-tip go" id="s_tip"></div>
+      </div>
+      <div class="s-card" style="margin-top:18px">
+        <h3>Estimated yearly emissions</h3>
+        <table class="s-emit"><thead><tr><th>Pollutant</th><th id="se_unit">Per year (tons)</th><th>Status</th></tr></thead><tbody id="s_emitbody"></tbody></table>
+        <p class="foot" style="margin-top:8px">Estimated maximum if the plant runs all year. &ldquo;Status&rdquo; compares each pollutant to the permitting limits.</p>
+      </div>
+      <div class="s-card" style="margin-top:18px">
+        <h3>Emissions vs. permitting limits</h3>
+        <div id="s_chart"></div>
+        <p class="foot" style="margin-top:8px">Bars are this project&rsquo;s estimated yearly emissions. Dashed lines are the limits: crossing the <b style="color:#b97b00">amber</b> line (100) needs an operating permit; crossing the <b style="color:#c0392b">red</b> line (250) triggers the heaviest federal review.</p>
+      </div>
+    </div>
+  </div>
+  
+  <p class="foot" style="max-width:none">Plain-language summary for planning and sales discussions. For the full basis &mdash; emission numbers, thresholds, citations, gray areas, and step-by-step applications &mdash; switch to the <b>Technical details</b> tab. Not a permit determination; confirm with a licensed Texas air-permitting consultant.</p>
+</div>
+<div id="tab-tech" style="display:none">
 
 <div class="wrap">
 <div class="grid">
@@ -333,6 +438,7 @@
 </p>
 </div>
 
+</div>
 <script>
 const PRESETS = [
   {g:"GE Vernova", n:"GE Frame 6B (PG6561B / MS6001B, legacy) — ~40 MW", mw:40, hr:10630},
@@ -396,6 +502,23 @@ function saveState(){
 }
 function loadState(){
   try{const raw=localStorage.getItem('turbinePermitTool'); if(!raw) return false; const o=JSON.parse(raw);
+    PERSIST.forEach(id=>{const el=$(id); if(el && o.f && o.f[id]!==undefined) el.value=o.f[id];});
+    UNIT=(o.unit==='si')?'si':'us'; applyUnitLabels(UNIT); syncCtrl(); calc(); return true;
+  }catch(e){return false;}
+}
+
+// ---- Shareable link (whole scenario encoded in the URL — no backend needed) ----
+function copyShareLink(){
+  const o={unit:UNIT,f:{}}; PERSIST.forEach(id=>{const el=$(id); if(el) o.f[id]=el.value;});
+  const s=btoa(encodeURIComponent(JSON.stringify(o)));
+  const url=location.origin+location.pathname+'#s='+s;
+  const ok=()=>{const b=$('btn-share'); if(b){const t=b.textContent; b.textContent='✓ Link copied'; setTimeout(()=>{b.textContent=t;},1800);}};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(url).then(ok,()=>prompt('Copy this link:',url));}
+  else{prompt('Copy this link:',url);}
+}
+function loadFromURL(){
+  try{const m=location.hash.match(/s=([^&]+)/); if(!m) return false;
+    const o=JSON.parse(decodeURIComponent(atob(m[1])));
     PERSIST.forEach(id=>{const el=$(id); if(el && o.f && o.f[id]!==undefined) el.value=o.f[id];});
     UNIT=(o.unit==='si')?'si':'us'; applyUnitLabels(UNIT); syncCtrl(); calc(); return true;
   }catch(e){return false;}
@@ -546,6 +669,8 @@ function calc(){
   ];
   $('lanenote').innerHTML="<b>"+notes[lane]+"</b>";
   renderSteps(lane, titleV, majorNSR, isAtt);
+  window.__R={lane:lane,majorNSR:majorNSR,titleV:titleV,nsrType:nsrType,scrMandated:scrMandated,isAtt:isAtt,rows:rows.map(r=>({k:r.k,t:r.t,crit:r.crit}))};
+  if(typeof renderSimple==='function' && simpleVisible()) renderSimple();
   saveState();
 }
 // ---- Next-steps (how to apply) ----
@@ -628,8 +753,129 @@ window.addEventListener('beforeprint',()=>{
 window.addEventListener('afterprint',()=>{
   document.querySelectorAll('details.law, details#nextcard').forEach((d,i)=>d.open=_saved[i]);
 });
+// ===== Dashboard (Overview tab) logic =====
+function simpleVisible(){const t=document.getElementById('tab-simple');return t && t.style.display!=='none';}
+function dlnFor(idx){const p=PRESETS[idx]||{}; return /PG6561B|Frame 5|7EA|SGT-600|2000E/.test(p.n||'')?15:9;}
+function updateCtlDetail(){
+  const el=document.getElementById('s_ctldetail'); if(!el) return;
+  const c=document.getElementById('s_controls').value;
+  const desc={dln:'Combustion-only NOx control built into the turbine.',winj:'Water/steam injected into the flame to cut NOx (older method).',scr:'Adds an SCR catalyst downstream to chemically reduce NOx.',both:'SCR for NOx plus an oxidation catalyst for CO — the lowest-emission package.'}[c]||'';
+  el.innerHTML='Approx. NOx '+$('noxsel').value+' ppm \u00B7 CO '+$('cosel').value+' ppm — '+desc;
+}
+(function(){const ss=document.getElementById('s_preset'); if(!ss) return; PRESETS.forEach((p,i)=>{ if(p.mw){const o=document.createElement('option');o.value=i;o.textContent=p.n;ss.appendChild(o);} });})();
+function showTab(name){
+  document.getElementById('tab-simple').style.display = name==='simple'?'block':'none';
+  document.getElementById('tab-tech').style.display = name==='tech'?'block':'none';
+  document.getElementById('tabb-simple').classList.toggle('active',name==='simple');
+  document.getElementById('tabb-tech').classList.toggle('active',name==='tech');
+  if(name==='simple'){ syncSimpleFromTech(); renderSimple(); }
+}
+function syncSimpleFromTech(){
+  const sp=document.getElementById('s_preset'); if(sp && $('preset').value) sp.value=$('preset').value;
+  document.getElementById('s_units').value=$('units').value;
+  const h=parseFloat($('hours').value)||8760; document.getElementById('s_profile').value = h<=4380?'2000':'8000';
+  document.getElementById('s_loc').value = $('status').value==='att'?'att':'na_mod';
+  const setSel=(id,v)=>{const el=document.getElementById(id); if(el && [...el.options].some(o=>o.value===v)) el.value=v;};
+  setSel('s_nox',$('noxsel').value); setSel('s_co',$('cosel').value);
+}
+function simpleApply(){
+  const idx=+document.getElementById('s_preset').value; const p=PRESETS[idx];
+  $('preset').value=idx; if(p && p.mw){ $('mw').value=p.mw; $('hr').value=(UNIT==='si'? +(p.hr*KJ).toPrecision(6) : p.hr); }
+  $('units').value=document.getElementById('s_units').value||1;
+  $('hours').value=document.getElementById('s_profile').value;
+  $('status').value=document.getElementById('s_loc').value;
+  $('noxsel').value=document.getElementById('s_nox').value;
+  $('cosel').value=document.getElementById('s_co').value;
+  syncCtrl(); calc();
+}
+function buildChart(rows, si){
+  const conv=v=> si? v*TON : v;
+  const crit=rows.filter(r=>r.crit);
+  if(!crit.length) return '';
+  const disp=crit.map(r=>({k:r.k,t:r.t,d:conv(r.t)}));
+  const t100=conv(100), t250=conv(250);
+  let maxv=t250*1.15; disp.forEach(x=>{ if(x.d>maxv) maxv=x.d*1.05; });
+  const L=120, RX=585, W=RX-L, top=44, rowH=26, h=top+crit.length*rowH+16;
+  const xf=v=>L+(v/maxv)*W;
+  const short={'NOx':'NOx','CO':'CO','VOC':'VOC','PM2.5 / PM10':'PM2.5','SO2':'SO2','H2SO4 mist':'H2SO4'};
+  let g='<svg viewBox="0 0 600 '+h+'" width="100%" font-family="Segoe UI,Arial" font-size="12">';
+  [[t100,'#b97b00','Operating permit (100)'],[t250,'#c0392b','Major / federal (250)']].forEach(rl=>{
+    const x=xf(rl[0]);
+    g+='<line x1="'+x+'" y1="'+(top-6)+'" x2="'+x+'" y2="'+(h-14)+'" stroke="'+rl[1]+'" stroke-width="1.5" stroke-dasharray="4 3"/>';
+    g+='<text x="'+x+'" y="'+(top-10)+'" fill="'+rl[1]+'" text-anchor="middle" font-weight="700" font-size="10">'+rl[2]+'</text>';
+  });
+  disp.forEach((r,i)=>{
+    const y=top+i*rowH;
+    const col=r.t>=250?'#c0392b':(r.t>=100?'#e0a200':'#1b8a4b');
+    const bx=Math.max(1,xf(r.d)-L);
+    g+='<text x="8" y="'+(y+14)+'" fill="#3a4757" font-weight="700">'+(short[r.k]||r.k)+'</text>';
+    g+='<rect x="'+L+'" y="'+(y+3)+'" width="'+bx+'" height="14" rx="3" fill="'+col+'"/>';
+    const lbl=r.d.toLocaleString('en-US',{maximumFractionDigits:0});
+    if(xf(r.d)>RX-44) g+='<text x="'+(xf(r.d)-5)+'" y="'+(y+14)+'" fill="#fff" font-size="11" text-anchor="end" font-weight="700">'+lbl+'</text>';
+    else g+='<text x="'+(xf(r.d)+5)+'" y="'+(y+14)+'" fill="#3a4757" font-size="11">'+lbl+'</text>';
+  });
+  g+='<line x1="'+L+'" y1="'+(h-14)+'" x2="'+RX+'" y2="'+(h-14)+'" stroke="#cfd8e3"/>';
+  g+='<text x="'+RX+'" y="'+(h-2)+'" fill="#8a99a8" font-size="10" text-anchor="end">'+(si?'tonnes/yr':'tons/yr')+'</text>';
+  g+='</svg>'; return g;
+}
+function renderSimple(){
+  const R=window.__R; if(!R) return;
+  const laneName=["Permit by Rule (lightest)","Texas Standard Permit","State permit + operating permit","Full federal review + operating permit"][R.lane];
+  const colors=["#1b8a4b","#1b8a4b","#b97b00","#c0392b"];
+  const times=["Days&ndash;weeks","1&ndash;3 months","6&ndash;12 months","12+ months"];
+  const reviews=["Pre-approved","Streamlined (state)","State + BACT","Federal PSD + BACT"];
+  const summ=[
+    "Small enough for the lightest, fastest authorization.",
+    "With this setup it qualifies for a streamlined Texas state permit &mdash; the fastest realistic path for a plant this size.",
+    "Needs a state construction permit plus a federal operating permit. Manageable, but plan for several months and emission controls.",
+    "Large enough to trigger the most thorough federal air-permit review. Expect a year or more &mdash; adding emission controls can move it to a faster path."
+  ];
+  const hero=document.getElementById('s_hero'); hero.style.background='linear-gradient(135deg,'+colors[R.lane]+',#2e6ba8)';
+  document.getElementById('s_lane').textContent=laneName;
+  document.getElementById('s_summary').innerHTML=summ[R.lane];
+  document.getElementById('s_time').innerHTML=times[R.lane];
+  document.getElementById('s_review').textContent=reviews[R.lane];
+  document.getElementById('s_op').textContent=R.titleV?'Required':'Not required';
+  document.getElementById('s_cost').textContent=['$','$$','$$$','$$$$'][R.lane];
+  updateCtlDetail();
+  const eb=document.getElementById('s_emitbody');
+  if(eb && R.rows){
+    const si=(typeof UNIT!=='undefined' && UNIT==='si');
+    const ue=document.getElementById('se_unit'); if(ue) ue.textContent= si?'Per year (tonnes)':'Per year (tons)';
+    const conv=v=> si? v*TON : v;
+    const names={'NOx':'NOx (smog-forming)','CO':'CO (carbon monoxide)','VOC':'VOC (smog-forming)','PM2.5 / PM10':'Fine particles (PM2.5)','SO2':'SO2','H2SO4 mist':'Sulfuric acid mist','CO2 (info)':'CO2 (greenhouse gas)'};
+    eb.innerHTML=R.rows.map(r=>{
+      let badge;
+      if(!r.crit) badge='<span class="s-badge info">Info only</span>';
+      else if(r.t>=250) badge='<span class="s-badge bad">Over major-source limit</span>';
+      else if(r.t>=100) badge='<span class="s-badge warn">Needs operating permit</span>';
+      else badge='<span class="s-badge ok">Under all limits</span>';
+      const val=conv(r.t).toLocaleString('en-US',{maximumFractionDigits:(r.crit?1:0)});
+      return '<tr><td>'+(names[r.k]||r.k)+'</td><td>'+val+'</td><td>'+badge+'</td></tr>';
+    }).join('');
+  }
+  const ch=document.getElementById('s_chart');
+  if(ch && R.rows) ch.innerHTML=buildChart(R.rows,(typeof UNIT!=='undefined' && UNIT==='si'));
+  const lvl=R.lane+1; let m=''; for(let i=1;i<=4;i++){m+='<div class="s-seg" style="background:'+(i<=lvl?colors[R.lane]:'#e3e8ee')+'"></div>';}
+  document.getElementById('s_meter').innerHTML=m;
+  document.getElementById('s_burden').textContent=["Lightest","Light","Moderate","Heaviest"][R.lane];
+  const needs=[
+    ["Register a simple pre-approved permit","Federal turbine emission standards still apply"],
+    ["Register a Texas Standard Permit (typically no public hearing)","Meet the permit's emission limits","Federal turbine emission standards apply"],
+    ["Texas construction permit with a best-controls (BACT) review and air modeling","Federal Title V operating permit","Federal turbine emission standards apply"],
+    ["Full federal PSD review: best-controls analysis, air-quality modeling, public comment period","Federal Title V operating permit","Federal turbine emission standards apply","Budget roughly 12+ months"]
+  ][R.lane];
+  document.getElementById('s_needs').innerHTML=needs.map(x=>'<li>'+x+'</li>').join('');
+  const tip=document.getElementById('s_tip'); const ctl=document.getElementById('s_controls').value;
+  if(R.lane>=3){ tip.className='s-tip warn'; tip.innerHTML='To make permitting faster &amp; cheaper, add SCR + a CO catalyst (choose &ldquo;SCR + CO catalyst&rdquo; above). That usually drops the project below the federal major-source line and into a quicker state permit.'; tip.style.display='block'; }
+  else if(R.lane===2 && ctl!=='both'){ tip.className='s-tip warn'; tip.innerHTML='Choosing &ldquo;SCR + CO catalyst&rdquo; above may reduce the review burden further.'; tip.style.display='block'; }
+  else if(R.lane<=1){ tip.className='s-tip go'; tip.innerHTML='This is already in a light, fast permitting lane.'; tip.style.display='block'; }
+  else { tip.style.display='none'; }
+}
+
 syncCtrl();
-if(!loadState()){ applyPreset(); }
+if(!loadFromURL() && !loadState()){ applyPreset(); }
+showTab('simple');
 </script>
 </body>
 </html>
