@@ -880,9 +880,7 @@ function simpleVisible(){const t=document.getElementById('tab-simple');return t 
 function dlnFor(idx){const p=PRESETS[idx]||{}; return /PG6561B|Frame 5|7EA|SGT-600|2000E/.test(p.n||'')?15:9;}
 function updateCtlDetail(){
   const el=document.getElementById('s_ctldetail'); if(!el) return;
-  const c=document.getElementById('s_controls').value;
-  const desc={dln:'Combustion-only NOx control built into the turbine.',winj:'Water/steam injected into the flame to cut NOx (older method).',scr:'Adds an SCR catalyst downstream to chemically reduce NOx.',both:'SCR for NOx plus an oxidation catalyst for CO — the lowest-emission package.'}[c]||'';
-  el.innerHTML='Approx. NOx '+$('noxsel').value+' ppm \u00B7 CO '+$('cosel').value+' ppm — '+desc;
+  el.innerHTML='Approx. NOx '+$('noxsel').value+' ppm \u00B7 CO '+$('cosel').value+' ppm';
 }
 (function(){const ss=document.getElementById('s_preset'); if(!ss) return; PRESETS.forEach((p,i)=>{ if(p.mw){const o=document.createElement('option');o.value=i;o.textContent=p.n;ss.appendChild(o);} });})();
 function showTab(name){
@@ -990,9 +988,10 @@ function renderSimple(){
     ["Full federal PSD review: best-controls analysis, air-quality modeling, public comment period","Federal Title V operating permit","Federal turbine emission standards apply","Budget roughly 12+ months"]
   ][R.lane];
   document.getElementById('s_needs').innerHTML=needs.map(x=>'<li>'+x+'</li>').join('');
-  const tip=document.getElementById('s_tip'); const ctl=document.getElementById('s_controls').value;
-  if(R.lane>=3){ tip.className='s-tip warn'; tip.innerHTML='To make permitting faster &amp; cheaper, add SCR + a CO catalyst (choose &ldquo;SCR + CO catalyst&rdquo; above). That usually drops the project below the federal major-source line and into a quicker state permit.'; tip.style.display='block'; }
-  else if(R.lane===2 && ctl!=='both'){ tip.className='s-tip warn'; tip.innerHTML='Choosing &ldquo;SCR + CO catalyst&rdquo; above may reduce the review burden further.'; tip.style.display='block'; }
+  const tip=document.getElementById('s_tip');
+  const nx2=parseFloat($('noxsel').value)||99, c2=parseFloat($('cosel').value)||99, hasBoth=(nx2<=5 && c2<=4);
+  if(R.lane>=3){ tip.className='s-tip warn'; tip.innerHTML='To make permitting faster &amp; cheaper, lower NOx with SCR and CO with an oxidation catalyst. That usually drops the project below the federal major-source line and into a quicker state permit.'; tip.style.display='block'; }
+  else if(R.lane===2 && !hasBoth){ tip.className='s-tip warn'; tip.innerHTML='Tightening NOx (SCR) and CO (oxidation catalyst) may reduce the review burden further.'; tip.style.display='block'; }
   else if(R.lane<=1){ tip.className='s-tip go'; tip.innerHTML='This is already in a light, fast permitting lane.'; tip.style.display='block'; }
   else { tip.style.display='none'; }
 }
