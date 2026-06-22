@@ -16,7 +16,7 @@
   header{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:22px 26px}
   header h1{margin:0 0 4px;font-size:21px}
   header p{margin:0;opacity:.9;font-size:13.5px}
-  .wrap{max-width:1180px;margin:0 auto;padding:20px}
+  .wrap{max-width:none;margin:0;padding:20px 32px}
   .grid{display:grid;grid-template-columns:380px 1fr;gap:20px}
   @media(max-width:880px){.grid{grid-template-columns:1fr}}
   .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 18px 16px;margin-bottom:18px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
@@ -108,7 +108,7 @@
   .tabbtn{background:transparent;border:none;color:#cfe0f5;font-size:14px;font-weight:700;padding:13px 20px;cursor:pointer;border-bottom:3px solid transparent}
   .tabbtn:hover{color:#fff}
   .tabbtn.active{color:#fff;border-bottom-color:#fff}
-  .simplewrap{max-width:1040px;margin:0 auto;padding:22px}
+  .simplewrap{max-width:none;margin:0;padding:22px 32px}
   .s-grid{display:grid;grid-template-columns:330px 1fr;gap:18px}
   @media(max-width:820px){.s-grid{grid-template-columns:1fr}}
   .s-card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
@@ -148,6 +148,8 @@
   .eqbtn{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.28);border-radius:6px;padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer}
   .eqbtn.active{background:#fff;color:var(--navy);border-color:#fff}
   .s-rulebadge{display:inline-block;font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:5px;background:#eef2f7;color:var(--navy);margin-right:4px}
+  details#glosscard{position:relative}
+  details#glosscard[open] .gloss{position:absolute;top:100%;right:0;margin-top:6px;width:340px;max-width:85vw;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:0 10px 26px rgba(0,0,0,.18);padding:12px 14px;max-height:65vh;overflow:auto;z-index:60}
 </style>
 </head>
 <body>
@@ -175,6 +177,7 @@
 <div id="tab-simple" class="simplewrap">
   <div class="s-grid">
     <div>
+    
     <div class="s-card">
       <h3>Your project</h3>
       <div class="s-field"><label>Turbine</label><select id="s_preset" onchange="simpleApply()"></select></div>
@@ -183,7 +186,13 @@
       <div class="s-field"><label>NOx control</label><select id="s_nox" onchange="simpleApply()"><option value="15">Combustion controls only &mdash; 15 ppm (older turbines)</option><option value="9">Combustion controls only &mdash; 9 ppm (newer turbines)</option><option value="25">Water / steam injection &mdash; 25 ppm</option><option value="5" selected>SCR added &mdash; 5 ppm</option><option value="3">SCR, well-controlled &mdash; 3 ppm</option><option value="2">SCR, best achievable &mdash; 2 ppm</option></select></div><div class="s-field"><label>CO control</label><select id="s_co" onchange="simpleApply()"><option value="25" selected>Uncontrolled &mdash; 25 ppm</option><option value="9">Combustion tuning &mdash; 9 ppm</option><option value="4">Oxidation catalyst &mdash; 4 ppm</option><option value="2">Oxidation catalyst, best &mdash; 2 ppm</option></select><div class="hint" style="margin-top:6px">SCR is an add-on that lowers NOx; an oxidation catalyst lowers CO. Lower ppm means lower emissions.</div></div>
       <div class="s-field"><label>Location air quality</label><select id="s_loc" onchange="simpleApply()"><option value="att">Clean-air (attainment) area — e.g. Bastrop, TX</option><option value="na_mod">Smoggy (ozone nonattainment) area</option></select></div>
     </div>
-    <details id="glosscard" class="s-card">
+    
+    </div>
+    <div>
+      
+      <div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;margin-bottom:16px">
+        <div class="s-hero" id="s_hero" style="flex:1 1 340px;margin-bottom:0"><h2>Permitting outlook</h2><div class="lane" id="s_lane">&mdash;</div><p id="s_summary"></p></div>
+        <details id="glosscard" class="s-card" style="flex:0 0 300px;margin-top:0">
     <summary>Key terms (plain English)</summary>
     <div class="gloss">
       <div><b>PSD</b> &mdash; Prevention of Significant Deterioration: the heaviest federal air permit, required for large plants in clean-air areas (~12+ months).</div>
@@ -199,9 +208,7 @@
       <div><b>Attainment / nonattainment</b> &mdash; whether the local area already meets air-quality standards (attainment = cleaner air, easier permitting).</div>
     </div>
   </details>
-    </div>
-    <div>
-      <div class="s-hero" id="s_hero"><h2>Permitting outlook</h2><div class="lane" id="s_lane">&mdash;</div><p id="s_summary"></p></div>
+      </div>
       <div class="s-card">
         <h3>What this means</h3>
         <div class="s-kpi">
