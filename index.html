@@ -154,6 +154,9 @@
   .statehelp{background:#e6f0fb;color:#23415f;font-size:12.5px;line-height:1.45;padding:8px 20px;border-bottom:1px solid #cfe0f5}
   .statehelp a{color:var(--blue);text-decoration:none;font-weight:700} .statehelp a:hover{text-decoration:underline}
   .statehelp b{color:var(--navy)}
+  .cmpbtn{background:var(--navy);color:#fff;border:none;border-radius:6px;padding:7px 12px;font-size:12.5px;font-weight:700;cursor:pointer}
+  .cmphead{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--line);padding-bottom:8px;margin-bottom:12px;gap:8px;flex-wrap:wrap}
+  .cmphead h3{margin:0;border:none;padding:0}
 </style>
 </head>
 <body>
@@ -172,10 +175,7 @@
   <span class="equiplabel">Equipment</span>
   <button id="eq-turbine" class="eqbtn active" onclick="setEquip('turbine')">Combustion turbine</button>
   <button id="eq-diesel" class="eqbtn" onclick="setEquip('diesel')">Reciprocating engine (diesel)</button>
-  <span class="equiplabel" style="margin-left:20px">Location (state)</span>
-  <select id="us_state" onchange="onStateChange()" class="statesel"></select>
 </div>
-<div id="state_help" class="statehelp"></div>
 <div id="equip-turbine">
 <div class="tabbar">
   <button id="tabb-simple" class="tabbtn active" onclick="showTab('simple')">Overview</button>
@@ -187,13 +187,18 @@
     
     <div class="s-card">
       <h3>Your project</h3>
+      <button onclick="loadProject()" class="cmpbtn" style="width:100%;margin-bottom:12px">↧ Load this project (4 × 6B, Texas)</button>
       <div class="s-field"><label>Turbine</label><select id="s_preset" onchange="simpleApply()"></select></div>
       <div class="s-field"><label>Number of units</label><input id="s_units" type="number" min="1" value="4" oninput="simpleApply()"></div>
       <div class="s-field"><label>How will it run?</label><select id="s_profile" onchange="simpleApply()"><option value="8000">Baseload — runs most of the year (8,000+ hr/yr)</option><option value="2000">Peaking — runs occasionally (~2,000 hr/yr)</option></select></div>
       <div class="s-field"><label>NOx control</label><select id="s_nox" onchange="simpleApply()"><option value="15">Combustion controls only &mdash; 15 ppm (older turbines)</option><option value="9">Combustion controls only &mdash; 9 ppm (newer turbines)</option><option value="25">Water / steam injection &mdash; 25 ppm</option><option value="5" selected>SCR added &mdash; 5 ppm</option><option value="3">SCR, well-controlled &mdash; 3 ppm</option><option value="2">SCR, best achievable &mdash; 2 ppm</option></select></div><div class="s-field"><label>CO control</label><select id="s_co" onchange="simpleApply()"><option value="25" selected>Uncontrolled &mdash; 25 ppm</option><option value="9">Combustion tuning &mdash; 9 ppm</option><option value="4">Oxidation catalyst &mdash; 4 ppm</option><option value="2">Oxidation catalyst, best &mdash; 2 ppm</option></select><div class="hint" style="margin-top:6px">SCR is an add-on that lowers NOx; an oxidation catalyst lowers CO. Lower ppm means lower emissions.</div></div>
       <div class="s-field"><label>Location air quality</label><select id="s_loc" onchange="simpleApply()"><option value="att">Clean-air (attainment) area</option><option value="na_mod">Smoggy (ozone nonattainment) area</option></select></div>
     </div>
-    
+    <div class="s-card" style="margin-top:18px">
+      <h3>Location</h3>
+      <div class="s-field"><label>State</label><select id="us_state" onchange="onStateChange()"></select></div>
+      <div id="state_help" class="statehelp" style="background:transparent;border:none;padding:0;margin-top:4px"></div>
+    </div>
     </div>
     <div>
       
@@ -230,6 +235,14 @@
         <div class="s-tip go" id="s_tip"></div>
       </div>
       <div class="s-card" style="margin-top:18px">
+        <h3>Cost &amp; timeline (rough)</h3>
+        <div class="s-kpi">
+          <div class="box"><div class="v" id="s_months">&mdash;</div><div class="l">Permitting timeline</div></div>
+          <div class="box"><div class="v" id="s_permitcost">&mdash;</div><div class="l">Permitting cost</div></div>
+        </div>
+        <p class="foot" style="margin-top:8px">Very rough order-of-magnitude for planning only &mdash; replace with consultant &amp; vendor quotes. Excludes turbine/engine and balance-of-plant cost.</p>
+      </div>
+      <div class="s-card" style="margin-top:18px">
         <h3>Estimated yearly emissions</h3>
         <table class="s-emit"><thead><tr><th>Pollutant</th><th id="se_unit">Per year (tons)</th><th>Status</th></tr></thead><tbody id="s_emitbody"></tbody></table>
         <p class="foot" style="margin-top:8px">Estimated maximum if the plant runs all year. &ldquo;Status&rdquo; compares each pollutant to the permitting limits.</p>
@@ -242,6 +255,10 @@
     </div>
   </div>
   
+  <div class="s-card" style="margin-top:18px">
+    <div class="cmphead"><h3>Compare scenarios</h3><div><button onclick="clearCompare()" class="cmpbtn" style="background:#eef2f7;color:var(--navy)">Clear</button> <button onclick="addCompare('turbine')" class="cmpbtn">+ Add current scenario</button></div></div>
+    <div id="compare_body"></div>
+  </div>
   <p class="foot" style="max-width:none">Plain-language summary for planning and sales discussions. For the full basis &mdash; emission numbers, thresholds, citations, gray areas, and step-by-step applications &mdash; switch to the <b>Technical details</b> tab. Not a permit determination; confirm with a licensed Texas air-permitting consultant.</p>
 </div>
 <div id="tab-tech" style="display:none">
@@ -496,6 +513,14 @@
         <div class="s-tip go" id="d_tip"></div>
       </div>
       <div class="s-card" style="margin-top:18px">
+        <h3>Cost &amp; timeline (rough)</h3>
+        <div class="s-kpi">
+          <div class="box"><div class="v" id="d_months">&mdash;</div><div class="l">Permitting timeline</div></div>
+          <div class="box"><div class="v" id="d_permitcost">&mdash;</div><div class="l">Permitting cost</div></div>
+        </div>
+        <p class="foot" style="margin-top:8px">Very rough order-of-magnitude for planning only &mdash; replace with consultant &amp; vendor quotes. Excludes engine and balance-of-plant cost.</p>
+      </div>
+      <div class="s-card" style="margin-top:18px">
         <h3>Estimated yearly emissions</h3>
         <table class="s-emit"><thead><tr><th>Pollutant</th><th id="de_unit">Per year (tons)</th><th>Status</th></tr></thead><tbody id="d_emitbody"></tbody></table>
         <p class="foot" style="margin-top:8px">Estimated for the selected duty. Diesel engines emit far more NOx and fine particles per unit than gas turbines.</p>
@@ -509,6 +534,10 @@
         <ul class="s-list" id="d_rules"></ul>
       </div>
     </div>
+  </div>
+  <div class="s-card" style="margin-top:18px">
+    <div class="cmphead"><h3>Compare scenarios</h3><div><button onclick="clearCompare()" class="cmpbtn" style="background:#eef2f7;color:var(--navy)">Clear</button> <button onclick="addCompare('diesel')" class="cmpbtn">+ Add current scenario</button></div></div>
+    <div id="d_compare_body"></div>
   </div>
   <p class="foot" style="max-width:none">Plain-language screen for diesel reciprocating engines (Cummins KTA / QSK). Federal rules: NSPS Subpart IIII and NESHAP Subpart ZZZZ. Not a permit determination &mdash; confirm with a licensed Texas air-permitting consultant.</p>
 </div>
@@ -551,6 +580,10 @@ function syncCtrl(){
 const $=id=>document.getElementById(id);
 const num=id=>parseFloat($(id).value)||0;
 const fmt=(v,d=1)=>v.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+function fmtMoney(v){return v>=1e6?'$'+(v/1e6).toFixed(v>=1e7?0:1)+'M':'$'+Math.round(v/1000)+'k';}
+function capexRange(lo,hi){return (lo<=0&&hi<=0)?'minimal':fmtMoney(lo)+'\u2013'+fmtMoney(hi);}
+const PMONTHS=["1\u20132 months","2\u20134 months","8\u201314 months","14\u201324 months"];
+const PCOST=["$5k\u201325k","$25k\u2013100k","$100k\u2013300k","$300k\u20131M+"];
 
 // ---- Unit system (US <-> Metric/SI) ----
 let UNIT='us';
@@ -828,6 +861,21 @@ window.addEventListener('afterprint',()=>{
   document.querySelectorAll('details.law, details#nextcard').forEach((d,i)=>d.open=_saved[i]);
 });
 // ===== Dashboard (Overview tab) logic =====
+function loadProject(){
+  // Pre-fill from the GP&E / Shanghai Minglan Technical Agreement (4x PG6561B, DLN, NG, baseload, TX)
+  setEquip('turbine');
+  var st=document.getElementById('us_state'); if(st){ st.value='TX'; onStateChange(); }
+  document.getElementById('s_preset').value='0';      // PG6561B
+  document.getElementById('s_units').value='4';
+  document.getElementById('s_profile').value='8000';  // baseload
+  document.getElementById('s_nox').value='15';        // DLN (legacy 6B) ~15 ppm
+  document.getElementById('s_co').value='25';         // CO uncontrolled (no CO catalyst in OEM scope)
+  simpleApply();
+  $('mw').value='39.62';                              // exact rated output from the agreement
+  calc();
+  showTab('simple');
+  try{var b=document.querySelector('[onclick="loadProject()"]'); if(b){var t=b.getAttribute('data-t')||b.textContent; b.setAttribute('data-t',t); b.textContent='\u2713 Project loaded'; b.style.background='#1b8a4b'; setTimeout(function(){b.textContent=t;b.style.background='';},1800);} window.scrollTo({top:0,behavior:'smooth'});}catch(e){}
+}
 function simpleVisible(){const t=document.getElementById('tab-simple');return t && t.style.display!=='none';}
 function dlnFor(idx){const p=PRESETS[idx]||{}; return /PG6561B|Frame 5|7EA|SGT-600|2000E/.test(p.n||'')?15:9;}
 function updateCtlDetail(){
@@ -912,6 +960,8 @@ function renderSimple(){
   document.getElementById('s_op').textContent=R.titleV?'Required':'Not required';
   document.getElementById('s_cost').textContent=['$','$$','$$$','$$$$'][R.lane];
   updateCtlDetail();
+  document.getElementById('s_months').textContent=PMONTHS[R.lane];
+  document.getElementById('s_permitcost').textContent=PCOST[R.lane];
   const eb=document.getElementById('s_emitbody');
   if(eb && R.rows){
     const si=(typeof UNIT!=='undefined' && UNIT==='si');
@@ -947,6 +997,36 @@ function renderSimple(){
   else { tip.style.display='none'; }
 }
 
+// ===== Scenario comparison =====
+let COMPARE=[];
+function addCompare(kind){
+  const gv=id=>{const e=document.getElementById(id);return e?e.textContent:'';};
+  let snap;
+  if(kind==='diesel'){
+    const u=document.getElementById('d_units').value, kw=document.getElementById('d_kw').value;
+    const ctrl=document.getElementById('d_ctrl').value==='t4'?'Tier 4':'uncontrolled';
+    const duty=parseFloat(document.getElementById('d_duty').value)<=200?'Emergency':'Prime';
+    snap={label:'Diesel · '+u+'×'+kw+'kW · '+ctrl+' · '+duty+' · '+USABBR, lane:gv('d_lane'), time:gv('d_months'), cost:gv('d_permitcost'), op:gv('d_op')};
+  } else {
+    const u=$('units').value, mw=$('mw').value, nx=$('noxsel').value, c=$('cosel').value;
+    const h=parseFloat($('hours').value)||0, duty=h>=8000?'Baseload':(h<=2000?'Peaking':h+'hr');
+    snap={label:'Turbine · '+u+'×'+mw+'MW · NOx'+nx+'/CO'+c+'ppm · '+duty+' · '+USABBR, lane:gv('s_lane'), time:gv('s_months'), cost:gv('s_permitcost'), op:gv('s_op')};
+  }
+  COMPARE.push(snap); if(COMPARE.length>3) COMPARE.shift(); renderCompare();
+}
+function rmCompare(i){COMPARE.splice(i,1);renderCompare();}
+function clearCompare(){COMPARE=[];renderCompare();}
+function renderCompare(){
+  let html;
+  if(!COMPARE.length){ html='<p class="foot">No scenarios saved yet. Set up a case (turbine or diesel) and click <b>+ Add current scenario</b> to compare up to 3 side by side.</p>'; }
+  else {
+    const fields=[['Setup','label'],['Permitting lane','lane'],['Timeline','time'],['Permitting cost','cost'],['Operating permit','op']];
+    html='<table class="cmp"><thead><tr><th></th>'+COMPARE.map((c,i)=>'<th>#'+(i+1)+' <span onclick="rmCompare('+i+')" style="color:#c0392b;cursor:pointer;font-weight:700">×</span></th>').join('')+'</tr></thead><tbody>';
+    fields.forEach(fd=>{ html+='<tr><td>'+fd[0]+'</td>'+COMPARE.map(c=>'<td>'+(c[fd[1]]||'')+'</td>').join('')+'</tr>'; });
+    html+='</tbody></table>';
+  }
+  ['compare_body','d_compare_body'].forEach(id=>{const b=document.getElementById(id); if(b) b.innerHTML=html;});
+}
 // ===== Diesel reciprocating-engine module =====
 function setEquip(name){
   document.getElementById('equip-turbine').style.display = name==='diesel'?'none':'block';
@@ -1008,6 +1088,8 @@ function dieselRender(R){
   const prime=!R.emergency;
   const rules=['<span class="s-rulebadge">NSPS IIII</span> Federal diesel-engine standard. '+(prime?'New <b>prime/continuous</b> engines must meet <b>Tier 4</b> — SCR + a diesel particulate filter.':'<b>Emergency</b> engines are limited to ~100 hr/yr testing/maintenance and are <b>exempt from Tier 4</b>.'),'<span class="s-rulebadge">NESHAP ZZZZ</span> Air-toxics rule for engines (formaldehyde, etc.); often met with an oxidation catalyst or by meeting the NSPS for new engines.','<span class="s-rulebadge">State</span> In '+USSTATE+': '+(R.lane>=3?'major source, so PSD + Title V apply.':(R.emergency?'emergency engines commonly qualify for a Permit by Rule / general permit.':'a state minor-source permit (or case-by-case); Title V if a major source.')),'<span class="s-rulebadge">Fuel</span> Must use ultra-low-sulfur diesel (ULSD, 15 ppm sulfur).'];
   document.getElementById('d_rules').innerHTML=rules.map(x=>'<li>'+x+'</li>').join('');
+  document.getElementById('d_months').textContent=PMONTHS[R.lane];
+  document.getElementById('d_permitcost').textContent=PCOST[R.lane];
 }
 
 // ===== National: state selector + attainment helper =====
@@ -1027,6 +1109,7 @@ if(!loadFromURL() && !loadState()){ applyPreset(); }
 showTab('simple');
 dieselModel();
 renderStateHelp();
+renderCompare();
 </script>
 </body>
 </html>
