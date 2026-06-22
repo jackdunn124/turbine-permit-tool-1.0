@@ -150,13 +150,17 @@
   .s-rulebadge{display:inline-block;font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:5px;background:#eef2f7;color:var(--navy);margin-right:4px}
   details#glosscard{position:relative}
   details#glosscard[open] .gloss{position:absolute;top:100%;right:0;margin-top:6px;width:340px;max-width:85vw;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:0 10px 26px rgba(0,0,0,.18);padding:12px 14px;max-height:65vh;overflow:auto;z-index:60}
+  .statesel{background:#fff;color:var(--navy);border:1px solid #fff;border-radius:6px;padding:6px 10px;font-size:13px;font-weight:700;cursor:pointer}
+  .statehelp{background:#e6f0fb;color:#23415f;font-size:12.5px;line-height:1.45;padding:8px 20px;border-bottom:1px solid #cfe0f5}
+  .statehelp a{color:var(--blue);text-decoration:none;font-weight:700} .statehelp a:hover{text-decoration:underline}
+  .statehelp b{color:var(--navy)}
 </style>
 </head>
 <body>
 <header style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
   <div>
     <h1>Gas Turbine Air-Permitting Lane Finder</h1>
-    <p>Live screening of federal (PSD / NSPS / Title V) and Texas (TCEQ) permitting paths for stationary combustion turbines. Planning tool — not a permit determination.</p>
+    <p>Live screening of federal (PSD / NSPS / Title V) and state air-permitting paths for stationary combustion turbines and reciprocating engines — anywhere in the U.S. Planning tool, not a permit determination.</p>
   </div>
   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
     <div class="unittoggle"><button id="btn-us" class="utg active" onclick="setUnits('us')">US units</button><button id="btn-si" class="utg" onclick="setUnits('si')">Metric (SI)</button></div>
@@ -168,7 +172,10 @@
   <span class="equiplabel">Equipment</span>
   <button id="eq-turbine" class="eqbtn active" onclick="setEquip('turbine')">Combustion turbine</button>
   <button id="eq-diesel" class="eqbtn" onclick="setEquip('diesel')">Reciprocating engine (diesel)</button>
+  <span class="equiplabel" style="margin-left:20px">Location (state)</span>
+  <select id="us_state" onchange="onStateChange()" class="statesel"></select>
 </div>
+<div id="state_help" class="statehelp"></div>
 <div id="equip-turbine">
 <div class="tabbar">
   <button id="tabb-simple" class="tabbtn active" onclick="showTab('simple')">Overview</button>
@@ -184,7 +191,7 @@
       <div class="s-field"><label>Number of units</label><input id="s_units" type="number" min="1" value="4" oninput="simpleApply()"></div>
       <div class="s-field"><label>How will it run?</label><select id="s_profile" onchange="simpleApply()"><option value="8000">Baseload — runs most of the year (8,000+ hr/yr)</option><option value="2000">Peaking — runs occasionally (~2,000 hr/yr)</option></select></div>
       <div class="s-field"><label>NOx control</label><select id="s_nox" onchange="simpleApply()"><option value="15">Combustion controls only &mdash; 15 ppm (older turbines)</option><option value="9">Combustion controls only &mdash; 9 ppm (newer turbines)</option><option value="25">Water / steam injection &mdash; 25 ppm</option><option value="5" selected>SCR added &mdash; 5 ppm</option><option value="3">SCR, well-controlled &mdash; 3 ppm</option><option value="2">SCR, best achievable &mdash; 2 ppm</option></select></div><div class="s-field"><label>CO control</label><select id="s_co" onchange="simpleApply()"><option value="25" selected>Uncontrolled &mdash; 25 ppm</option><option value="9">Combustion tuning &mdash; 9 ppm</option><option value="4">Oxidation catalyst &mdash; 4 ppm</option><option value="2">Oxidation catalyst, best &mdash; 2 ppm</option></select><div class="hint" style="margin-top:6px">SCR is an add-on that lowers NOx; an oxidation catalyst lowers CO. Lower ppm means lower emissions.</div></div>
-      <div class="s-field"><label>Location air quality</label><select id="s_loc" onchange="simpleApply()"><option value="att">Clean-air (attainment) area — e.g. Bastrop, TX</option><option value="na_mod">Smoggy (ozone nonattainment) area</option></select></div>
+      <div class="s-field"><label>Location air quality</label><select id="s_loc" onchange="simpleApply()"><option value="att">Clean-air (attainment) area</option><option value="na_mod">Smoggy (ozone nonattainment) area</option></select></div>
     </div>
     
     </div>
@@ -469,7 +476,7 @@
       <div class="s-field"><label>Number of units</label><input id="d_units" type="number" min="1" value="4" oninput="dieselCalc()"></div>
       <div class="s-field"><label>How will it run?</label><select id="d_duty" onchange="dieselCalc()"><option value="100">Emergency / standby (~100 hr/yr)</option><option value="8760" selected>Prime / continuous (8,760 hr/yr)</option></select></div>
       <div class="s-field"><label>Emission controls</label><select id="d_ctrl" onchange="dieselCalc()"><option value="unc">Tier 2 / uncontrolled (older)</option><option value="t4" selected>Tier 4 &mdash; SCR + particulate filter</option></select><div class="hint" style="margin-top:6px">New prime engines must meet Tier 4 (SCR + particulate filter). Emergency engines are exempt and run limited hours.</div></div>
-      <div class="s-field"><label>Location air quality</label><select id="d_loc" onchange="dieselCalc()"><option value="att">Clean-air (attainment) area &mdash; e.g. Bastrop, TX</option><option value="na_mod">Smoggy (ozone nonattainment) area</option></select></div>
+      <div class="s-field"><label>Location air quality</label><select id="d_loc" onchange="dieselCalc()"><option value="att">Clean-air (attainment) area</option><option value="na_mod">Smoggy (ozone nonattainment) area</option></select></div>
     </div>
     </div>
     <div>
@@ -730,7 +737,7 @@ function calc(){
   });
   const notes=[
     "PBR rarely fits turbines of this size.",
-    "Recommended lane: register under the TCEQ EGU Standard Permit. NSPS KKKKa still applies.",
+    "Recommended lane: register under your state's EGU / minor-source permit. NSPS KKKKa still applies.",
     "Recommended lane: minor NSR construction permit plus a Title V operating permit. NSPS KKKKa still applies.",
     "Recommended lane: full major-source review plus Title V — the long path. Adding SCR + CO oxidation catalyst is usually what pulls a baseload plant back down into the minor lanes.",
   ];
@@ -759,9 +766,9 @@ function olist(arr){return '<ol class="steps">'+arr.map(x=>`<li>${x}</li>`).join
 function grp(title){return `<div class="stepgrp">${title}</div>`;}
 
 function renderSteps(lane, titleV, majorNSR, isAtt){
-  const laneName=["Permit by Rule","TCEQ EGU Standard Permit","Minor NSR permit + Title V","PSD / Nonattainment-NSR + Title V"][lane];
+  const laneName=["Permit by Rule / general permit","State EGU / minor-source permit","Minor NSR permit + Title V","PSD / Nonattainment-NSR + Title V"][lane];
   $('nexth').textContent="Next steps: how to apply — "+laneName;
-  $('nextintro').innerHTML=`Below is the ordered roadmap for the <b>${laneName}</b> lane your inputs landed in, plus the federal steps that always apply. Open each linked form/page in a new tab.`;
+  $('nextintro').innerHTML=`Below is the ordered roadmap for the <b>${laneName}</b> lane your inputs landed in, plus the federal steps that always apply. Open each linked form/page in a new tab. <b>Note:</b> the state forms/links below use Texas (TCEQ) as the worked example &mdash; the federal steps apply nationwide; substitute your state's air agency.`;
   const start=[
     `<b>Set up STEERS & your Core Data Form.</b> Create a ${a(LK.steers,"STEERS account")} (TCEQ's online filing system) and complete the ${a(LK.core,"Core Data Form (TCEQ-10400)")} to get your Regulated Entity & Customer numbers.`,
     `<b>Finalize your emissions basis.</b> Lock in vendor-guaranteed NOx/CO/VOC/PM rates and compute plant-wide PTE (this tool's table) — every application hinges on these numbers.`
@@ -887,13 +894,13 @@ function buildChart(rows, si){
 }
 function renderSimple(){
   const R=window.__R; if(!R) return;
-  const laneName=["Permit by Rule (lightest)","Texas Standard Permit","State permit + operating permit","Full federal review + operating permit"][R.lane];
+  const laneName=["Permit by Rule / general permit (lightest)","State minor-source permit","State permit + Title V operating permit","Federal PSD + Title V (heaviest)"][R.lane];
   const colors=["#1b8a4b","#1b8a4b","#b97b00","#c0392b"];
   const times=["Days&ndash;weeks","1&ndash;3 months","6&ndash;12 months","12+ months"];
   const reviews=["Pre-approved","Streamlined (state)","State + BACT","Federal PSD + BACT"];
   const summ=[
     "Small enough for the lightest, fastest authorization.",
-    "With this setup it qualifies for a streamlined Texas state permit &mdash; the fastest realistic path for a plant this size.",
+    "With this setup it qualifies for a streamlined state minor-source permit &mdash; the fastest realistic path for a plant this size.",
     "Needs a state construction permit plus a federal operating permit. Manageable, but plan for several months and emission controls.",
     "Large enough to trigger the most thorough federal air-permit review. Expect a year or more &mdash; adding emission controls can move it to a faster path."
   ];
@@ -928,8 +935,8 @@ function renderSimple(){
   document.getElementById('s_burden').textContent=["Lightest","Light","Moderate","Heaviest"][R.lane];
   const needs=[
     ["Register a simple pre-approved permit","Federal turbine emission standards still apply"],
-    ["Register a Texas Standard Permit (typically no public hearing)","Meet the permit's emission limits","Federal turbine emission standards apply"],
-    ["Texas construction permit with a best-controls (BACT) review and air modeling","Federal Title V operating permit","Federal turbine emission standards apply"],
+    ["Register your state's minor-source / general permit (often no public hearing)","Meet the permit's emission limits","Federal turbine emission standards apply"],
+    ["State construction permit with a best-controls (BACT) review and air modeling","Federal Title V operating permit","Federal turbine emission standards apply"],
     ["Full federal PSD review: best-controls analysis, air-quality modeling, public comment period","Federal Title V operating permit","Federal turbine emission standards apply","Budget roughly 12+ months"]
   ][R.lane];
   document.getElementById('s_needs').innerHTML=needs.map(x=>'<li>'+x+'</li>').join('');
@@ -972,10 +979,10 @@ function dieselCalc(){
 function dieselRender(R){
   const si=(typeof UNIT!=='undefined'&&UNIT==='si'); const conv=v=>si?v*TON:v;
   const colors=["#1b8a4b","#1b8a4b","#b97b00","#c0392b"];
-  const laneName=["Permit by Rule (lightest)","Texas Standard Permit","State permit + operating permit","Full federal review + operating permit"][R.lane];
+  const laneName=["Permit by Rule / general permit (lightest)","State minor-source permit","State permit + Title V operating permit","Federal PSD + Title V (heaviest)"][R.lane];
   const times=["Days–weeks","1–3 months","6–12 months","12+ months"];
   const reviews=["Pre-approved","Streamlined (state)","State + BACT","Federal PSD + BACT"];
-  const summ=["Emergency/standby engines run few hours, so emissions stay low — the lightest, fastest authorization (often Permit by Rule).","With this setup it fits a streamlined Texas state permit.","Needs a state construction permit plus a federal operating permit. Plan several months and strong controls.","Large/continuous diesel engines emit a lot — this triggers the heaviest federal review (PSD). Expect 12+ months."];
+  const summ=["Emergency/standby engines run few hours, so emissions stay low — the lightest, fastest authorization (often Permit by Rule).","With this setup it fits a streamlined state minor-source permit.","Needs a state construction permit plus a federal operating permit. Plan several months and strong controls.","Large/continuous diesel engines emit a lot — this triggers the heaviest federal review (PSD). Expect 12+ months."];
   document.getElementById('d_hero').style.background='linear-gradient(135deg,'+colors[R.lane]+',#2e6ba8)';
   document.getElementById('d_lane').textContent=laneName;
   document.getElementById('d_summary').innerHTML=summ[R.lane];
@@ -986,7 +993,7 @@ function dieselRender(R){
   let m=''; const lvl=R.lane+1; for(let i=1;i<=4;i++){m+='<div class="s-seg" style="background:'+(i<=lvl?colors[R.lane]:'#e3e8ee')+'"></div>';}
   document.getElementById('d_meter').innerHTML=m;
   document.getElementById('d_burden').textContent=["Lightest","Light","Moderate","Heaviest"][R.lane];
-  const needs=[["Likely a Permit by Rule for emergency/standby engines","Keep a non-resettable hour meter (~100 hr/yr cap)","Federal NSPS IIII + NESHAP ZZZZ still apply"],["Register a Texas Standard Permit / PBR","Meet the permit emission limits","Federal NSPS IIII + NESHAP ZZZZ apply"],["State construction permit with BACT + air modeling","Federal Title V operating permit","NSPS IIII (Tier 4) + NESHAP ZZZZ apply"],["Full federal PSD review: BACT, air modeling, public comment","Federal Title V operating permit","NSPS IIII Tier 4 (SCR + particulate filter) + NESHAP ZZZZ","Budget ~12+ months"]][R.lane];
+  const needs=[["Likely a Permit by Rule for emergency/standby engines","Keep a non-resettable hour meter (~100 hr/yr cap)","Federal NSPS IIII + NESHAP ZZZZ still apply"],["Register your state's minor-source / general permit","Meet the permit emission limits","Federal NSPS IIII + NESHAP ZZZZ apply"],["State construction permit with BACT + air modeling","Federal Title V operating permit","NSPS IIII (Tier 4) + NESHAP ZZZZ apply"],["Full federal PSD review: BACT, air modeling, public comment","Federal Title V operating permit","NSPS IIII Tier 4 (SCR + particulate filter) + NESHAP ZZZZ","Budget ~12+ months"]][R.lane];
   document.getElementById('d_needs').innerHTML=needs.map(x=>'<li>'+x+'</li>').join('');
   const tip=document.getElementById('d_tip');
   if(R.lane>=3){tip.className='s-tip warn';tip.innerHTML='Running large diesels continuously drives the heaviest permitting. Using them only for backup (emergency duty) keeps emissions — and permitting — far lighter.';}
@@ -999,14 +1006,27 @@ function dieselRender(R){
   eb.innerHTML=R.rows.map(r=>{let b; if(r.t>=250)b='<span class="s-badge bad">Over major-source limit</span>'; else if(r.t>=100)b='<span class="s-badge warn">Needs operating permit</span>'; else b='<span class="s-badge ok">Under all limits</span>'; return '<tr><td>'+(names[r.k]||r.k)+'</td><td>'+conv(r.t).toLocaleString('en-US',{maximumFractionDigits:1})+'</td><td>'+b+'</td></tr>';}).join('');
   const ch=document.getElementById('d_chart'); if(ch) ch.innerHTML=buildChart(R.rows,si);
   const prime=!R.emergency;
-  const rules=['<span class="s-rulebadge">NSPS IIII</span> Federal diesel-engine standard. '+(prime?'New <b>prime/continuous</b> engines must meet <b>Tier 4</b> — SCR + a diesel particulate filter.':'<b>Emergency</b> engines are limited to ~100 hr/yr testing/maintenance and are <b>exempt from Tier 4</b>.'),'<span class="s-rulebadge">NESHAP ZZZZ</span> Air-toxics rule for engines (formaldehyde, etc.); often met with an oxidation catalyst or by meeting the NSPS for new engines.','<span class="s-rulebadge">Texas</span> '+(R.lane>=3?'Major source, so PSD + Title V apply.':(R.emergency?'Emergency engines commonly qualify for a Permit by Rule.':'Standard Permit or case-by-case 116.111; Title V if a major source.')),'<span class="s-rulebadge">Fuel</span> Must use ultra-low-sulfur diesel (ULSD, 15 ppm sulfur).'];
+  const rules=['<span class="s-rulebadge">NSPS IIII</span> Federal diesel-engine standard. '+(prime?'New <b>prime/continuous</b> engines must meet <b>Tier 4</b> — SCR + a diesel particulate filter.':'<b>Emergency</b> engines are limited to ~100 hr/yr testing/maintenance and are <b>exempt from Tier 4</b>.'),'<span class="s-rulebadge">NESHAP ZZZZ</span> Air-toxics rule for engines (formaldehyde, etc.); often met with an oxidation catalyst or by meeting the NSPS for new engines.','<span class="s-rulebadge">State</span> In '+USSTATE+': '+(R.lane>=3?'major source, so PSD + Title V apply.':(R.emergency?'emergency engines commonly qualify for a Permit by Rule / general permit.':'a state minor-source permit (or case-by-case); Title V if a major source.')),'<span class="s-rulebadge">Fuel</span> Must use ultra-low-sulfur diesel (ULSD, 15 ppm sulfur).'];
   document.getElementById('d_rules').innerHTML=rules.map(x=>'<li>'+x+'</li>').join('');
 }
+
+// ===== National: state selector + attainment helper =====
+const US_STATES=[["AL","Alabama"],["AK","Alaska"],["AZ","Arizona"],["AR","Arkansas"],["CA","California"],["CO","Colorado"],["CT","Connecticut"],["DE","Delaware"],["DC","Washington DC"],["FL","Florida"],["GA","Georgia"],["HI","Hawaii"],["ID","Idaho"],["IL","Illinois"],["IN","Indiana"],["IA","Iowa"],["KS","Kansas"],["KY","Kentucky"],["LA","Louisiana"],["ME","Maine"],["MD","Maryland"],["MA","Massachusetts"],["MI","Michigan"],["MN","Minnesota"],["MS","Mississippi"],["MO","Missouri"],["MT","Montana"],["NE","Nebraska"],["NV","Nevada"],["NH","New Hampshire"],["NJ","New Jersey"],["NM","New Mexico"],["NY","New York"],["NC","North Carolina"],["ND","North Dakota"],["OH","Ohio"],["OK","Oklahoma"],["OR","Oregon"],["PA","Pennsylvania"],["RI","Rhode Island"],["SC","South Carolina"],["SD","South Dakota"],["TN","Tennessee"],["TX","Texas"],["UT","Utah"],["VT","Vermont"],["VA","Virginia"],["WA","Washington"],["WV","West Virginia"],["WI","Wisconsin"],["WY","Wyoming"]];
+const NAA={TX:"Ozone nonattainment: Houston-Galveston-Brazoria, Dallas-Fort Worth, and Bexar (San Antonio). Most other counties (incl. Bastrop) are attainment.",CA:"Extensive ozone nonattainment: South Coast (LA), San Joaquin Valley, Sacramento, Ventura, Coachella & more — plus local air districts with stricter rules.",AZ:"Ozone nonattainment: Phoenix-Mesa metro.",CO:"Ozone nonattainment: Denver Metro / North Front Range.",CT:"Ozone nonattainment: most of the state (NY metro).",IL:"Ozone nonattainment: Chicago metro.",IN:"Ozone nonattainment: NW Indiana (Chicago area).",MD:"Ozone nonattainment: Baltimore and DC-metro counties.",NJ:"Ozone nonattainment: most of the state (NY & Philadelphia metros).",NY:"Ozone nonattainment: NYC metro / Lower Hudson Valley.",PA:"Ozone nonattainment: Philadelphia metro (Pittsburgh historically).",UT:"Ozone nonattainment: Wasatch Front (Salt Lake).",WI:"Ozone nonattainment: Milwaukee / Lake Michigan shoreline.",DC:"Ozone nonattainment: Washington DC metro.",NV:"Generally attainment (Las Vegas / Clark County near-threshold historically).",GA:"Atlanta metro was historically nonattainment; confirm current status.",MO:"St. Louis metro ozone nonattainment.",NM:"Generally attainment; Dona Ana (Sunland Park) ozone nonattainment near El Paso."};
+let USSTATE="Texas", USABBR="TX";
+(function(){const sel=document.getElementById('us_state'); if(!sel) return; US_STATES.forEach(x=>{const o=document.createElement('option');o.value=x[0];o.textContent=x[1]; if(x[0]==='TX')o.selected=true; sel.appendChild(o);});})();
+function renderStateHelp(){
+  const el=document.getElementById('state_help'); if(!el) return;
+  const note=NAA[USABBR]||"Most areas are attainment; confirm your specific county.";
+  el.innerHTML='<b>'+USSTATE+':</b> '+note+' Confirm your county in the <a href="https://www.epa.gov/green-book" target="_blank" rel="noopener">EPA Green Book</a>, then set the air-quality status below. The federal analysis is the same nationwide; the state construction-permit step is handled by '+USSTATE+"'s air agency.";
+}
+function onStateChange(){const sel=document.getElementById('us_state'); USABBR=sel.value; USSTATE=sel.options[sel.selectedIndex].text; renderStateHelp(); calc(); if(typeof dieselCalc==='function') dieselCalc();}
 
 syncCtrl();
 if(!loadFromURL() && !loadState()){ applyPreset(); }
 showTab('simple');
 dieselModel();
+renderStateHelp();
 </script>
 </body>
 </html>
