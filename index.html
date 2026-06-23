@@ -136,10 +136,10 @@
   .s-badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11.5px;font-weight:700}
   .s-badge.ok{background:var(--greenbg);color:var(--green)} .s-badge.warn{background:var(--amberbg);color:var(--amber)} .s-badge.bad{background:var(--redbg);color:var(--red)} .s-badge.info{background:#eef2f7;color:var(--mut)}
   details#glosscard{margin-top:18px}
-  details#glosscard summary{list-style:none;cursor:pointer;font-weight:700;color:var(--navy);font-size:14px;display:flex;justify-content:space-between;align-items:center}
-  details#glosscard summary::-webkit-details-marker{display:none}
-  details#glosscard summary::after{content:'\25B8 show';font-size:12px;color:var(--navy2)}
-  details#glosscard[open] summary::after{content:'\25BE hide'}
+  details#glosscard summary,details#d_glosscard summary{list-style:none;cursor:pointer;font-weight:700;color:var(--navy);font-size:14px;display:flex;justify-content:space-between;align-items:center}
+  details#glosscard summary::-webkit-details-marker,details#d_glosscard summary::-webkit-details-marker{display:none}
+  details#glosscard summary::after,details#d_glosscard summary::after{content:'\25B8 show';font-size:12px;color:var(--navy2)}
+  details#glosscard[open] summary::after,details#d_glosscard[open] summary::after{content:'\25BE hide'}
   .gloss{margin:12px 0 0;font-size:13.5px;line-height:1.55;color:#3a4757}
   .gloss div{padding:6px 0;border-bottom:1px dashed var(--line)}
   .gloss b{color:var(--navy)}
@@ -148,8 +148,8 @@
   .eqbtn{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.28);border-radius:6px;padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer}
   .eqbtn.active{background:#fff;color:var(--navy);border-color:#fff}
   .s-rulebadge{display:inline-block;font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:5px;background:#eef2f7;color:var(--navy);margin-right:4px}
-  details#glosscard{position:relative}
-  details#glosscard[open] .gloss{position:absolute;top:100%;right:0;margin-top:6px;width:340px;max-width:85vw;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:0 10px 26px rgba(0,0,0,.18);padding:12px 14px;max-height:65vh;overflow:auto;z-index:60}
+  details#glosscard,details#d_glosscard{position:relative}
+  details#glosscard[open] .gloss,details#d_glosscard[open] .gloss{position:absolute;top:100%;right:0;margin-top:6px;width:340px;max-width:85vw;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:0 10px 26px rgba(0,0,0,.18);padding:12px 14px;max-height:65vh;overflow:auto;z-index:60}
   .statesel{background:#fff;color:var(--navy);border:1px solid #fff;border-radius:6px;padding:6px 10px;font-size:13px;font-weight:700;cursor:pointer}
   .statehelp{background:#e6f0fb;color:#23415f;font-size:12.5px;line-height:1.45;padding:8px 20px;border-bottom:1px solid #cfe0f5}
   .statehelp a{color:var(--blue);text-decoration:none;font-weight:700} .statehelp a:hover{text-decoration:underline}
@@ -163,7 +163,7 @@
 <header style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
   <div>
     <h1>Gas Turbine Air-Permitting Lane Finder</h1>
-    <p>Live screening of federal (PSD / NSPS / Title V) and state air-permitting paths for stationary combustion turbines and reciprocating engines — anywhere in the U.S. Planning tool, not a permit determination.</p>
+    <p>Live screening of U.S. federal/state air-permitting paths for stationary combustion turbines, and IFC / World Bank Group EHS pathways for reciprocating (diesel) engines. Planning tool, not a permit determination.</p>
   </div>
   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
     <div class="unittoggle"><button id="btn-us" class="utg active" onclick="setUnits('us')">US units</button><button id="btn-si" class="utg" onclick="setUnits('si')">Metric (SI)</button></div>
@@ -190,8 +190,8 @@
       <button onclick="loadProject()" class="cmpbtn" style="width:100%;margin-bottom:12px">↧ Load this project (4 × 6B, Texas)</button>
       <div class="s-field"><label>Turbine</label><select id="s_preset" onchange="simpleApply()"></select></div>
       <div class="s-field"><label>Number of units</label><input id="s_units" type="number" min="1" value="4" oninput="simpleApply()"></div>
-      <div class="s-field"><label>How will it run?</label><select id="s_profile" onchange="simpleApply()"><option value="8000">Baseload — runs most of the year (8,000+ hr/yr)</option><option value="2000">Peaking — runs occasionally (~2,000 hr/yr)</option></select></div>
-      <div class="s-field"><label>NOx control</label><select id="s_nox" onchange="simpleApply()"><option value="15">Combustion controls only (DLN) &mdash; 15 ppm (older turbines)</option><option value="9">Combustion controls only (DLN) &mdash; 9 ppm (newer turbines)</option><option value="25">Water / steam injection &mdash; 25 ppm</option><option value="5" selected>SCR added &mdash; 5 ppm</option><option value="3">SCR, well-controlled &mdash; 3 ppm</option><option value="2">SCR, best achievable &mdash; 2 ppm</option></select></div><div class="s-field"><label>CO control</label><select id="s_co" onchange="simpleApply()"><option value="25" selected>Uncontrolled &mdash; 25 ppm</option><option value="9">Combustion tuning &mdash; 9 ppm</option><option value="4">Oxidation catalyst &mdash; 4 ppm</option><option value="2">Oxidation catalyst, best &mdash; 2 ppm</option></select><div class="hint" style="margin-top:6px">SCR is an add-on that lowers NOx; an oxidation catalyst lowers CO. Lower ppm means lower emissions.</div></div>
+      <div class="s-field"><label>How will it run?</label><select id="s_profile" onchange="simpleApply()"><option value="8000">Baseload — 8,000+ hr/yr</option><option value="2000">Peaking — ~2,000 hr/yr</option></select></div>
+      <div class="s-field"><label>NOx control</label><select id="s_nox" onchange="simpleApply()"><option value="15">DLN combustion only &mdash; 15 ppm (older)</option><option value="9">DLN combustion only &mdash; 9 ppm (newer)</option><option value="25">Water / steam injection &mdash; 25 ppm</option><option value="5" selected>SCR added &mdash; 5 ppm</option><option value="3">SCR, well-controlled &mdash; 3 ppm</option><option value="2">SCR, best achievable &mdash; 2 ppm</option></select></div><div class="s-field"><label>CO control</label><select id="s_co" onchange="simpleApply()"><option value="25" selected>Uncontrolled &mdash; 25 ppm</option><option value="9">Combustion tuning &mdash; 9 ppm</option><option value="4">Oxidation catalyst &mdash; 4 ppm</option><option value="2">Oxidation catalyst, best &mdash; 2 ppm</option></select><div class="hint" style="margin-top:6px">SCR is an add-on that lowers NOx; an oxidation catalyst lowers CO. Lower ppm means lower emissions.</div></div>
       <div class="s-field"><label>Location air quality</label><select id="s_loc" onchange="simpleApply()"><option value="att">Clean-air (attainment) area</option><option value="na_mod">Smoggy (ozone nonattainment) area</option></select></div>
     </div>
     <div class="s-card" style="margin-top:18px">
@@ -288,10 +288,10 @@
       <input id="hours" type="number" step="10" value="8760" oninput="calc()">
       <label>Location / air-quality status</label>
       <select id="status" onchange="calc()">
-        <option value="att">Attainment area — PSD program (e.g. Bastrop / Austin-Round Rock)</option>
-        <option value="na_mod">Ozone nonattainment — Marginal/Moderate (NSR @100 tpy)</option>
-        <option value="na_ser">Ozone nonattainment — Serious (NSR @50 tpy)</option>
-        <option value="na_sev">Ozone nonattainment — Severe (NSR @25 tpy)</option>
+        <option value="att">Attainment area — PSD program</option>
+        <option value="na_mod">Nonattainment — Marginal/Moderate (100 tpy)</option>
+        <option value="na_ser">Nonattainment — Serious (50 tpy)</option>
+        <option value="na_sev">Nonattainment — Severe (25 tpy)</option>
       </select>
     </div>
 
@@ -299,21 +299,21 @@
       <h2>3 · Emission Controls</h2>
       <label>NOx control</label>
       <select id="noxsel" onchange="syncCtrl();calc()">
-        <option value="9">DLN1+ / upgraded combustor — ~9 ppm</option>
-        <option value="15">DLN (legacy, e.g. PG6561B) — ~15 ppm</option>
-        <option value="25">Water/steam injection — ~25 ppm</option>
-        <option value="5" selected>DLN + SCR — ~5 ppm</option>
-        <option value="3">DLN + SCR (tuned) — ~3 ppm</option>
-        <option value="2">DLN + SCR (aggressive) — ~2 ppm</option>
+        <option value="9">DLN1+ (upgraded) — 9 ppm</option>
+        <option value="15">DLN (legacy) — 15 ppm</option>
+        <option value="25">Water/steam injection — 25 ppm</option>
+        <option value="5" selected>DLN + SCR — 5 ppm</option>
+        <option value="3">DLN + SCR (tuned) — 3 ppm</option>
+        <option value="2">DLN + SCR (best) — 2 ppm</option>
         <option value="custom">Custom ppm…</option>
       </select>
       <input id="noxppm" type="number" step="0.1" value="5" style="margin-top:6px;display:none" oninput="calc()">
       <label>CO control</label>
       <select id="cosel" onchange="syncCtrl();calc()">
-        <option value="25" selected>Uncontrolled — ~25 ppm</option>
-        <option value="9">Good DLN tune — ~9 ppm</option>
-        <option value="4">Oxidation catalyst — ~4 ppm</option>
-        <option value="2">Oxidation catalyst (high) — ~2 ppm</option>
+        <option value="25" selected>Uncontrolled — 25 ppm</option>
+        <option value="9">Good DLN tune — 9 ppm</option>
+        <option value="4">Oxidation catalyst — 4 ppm</option>
+        <option value="2">Oxidation catalyst (best) — 2 ppm</option>
         <option value="custom">Custom ppm…</option>
       </select>
       <input id="coppm" type="number" step="0.1" value="25" style="margin-top:6px;display:none" oninput="calc()">
@@ -483,27 +483,56 @@
 </div>
 </div>
 <div id="equip-diesel" style="display:none">
+<div class="tabbar">
+  <button id="dsub-ov" class="tabbtn active" onclick="dieselTab('ov')">Overview</button>
+  <button id="dsub-tech" class="tabbtn" onclick="dieselTab('tech')">Technical details</button>
+</div>
 <div class="simplewrap">
   <div class="s-grid">
     <div>
     <div class="s-card">
       <h3>Diesel engine project</h3>
-      <div class="s-field"><label>Engine model</label><select id="d_model" onchange="dieselModel()"></select></div>
+      <div class="s-field"><label>Load project</label><select id="d_project" onchange="loadDieselProject()"><option value="">&mdash; Choose a project &mdash;</option><option value="perseus">Perseus &mdash; 28 &times; KTA50-G3</option><option value="montage">Montage &mdash; 32 &times; KTA50-G21</option></select></div>
+      <div class="s-field"><label>Engine model (Cummins)</label><select id="d_model" onchange="dieselModel()"></select></div>
       <div class="s-field"><label>Rated power / unit (kW)</label><input id="d_kw" type="number" min="1" value="2000" oninput="dieselCalc()"></div>
       <div class="s-field"><label>Number of units</label><input id="d_units" type="number" min="1" value="4" oninput="dieselCalc()"></div>
       <div class="s-field"><label>How will it run?</label><select id="d_duty" onchange="dieselCalc()"><option value="100">Emergency / standby (~100 hr/yr)</option><option value="8760" selected>Prime / continuous (8,760 hr/yr)</option></select></div>
-      <div class="s-field"><label>Emission controls</label><select id="d_ctrl" onchange="dieselCalc()"><option value="unc">Tier 2 / uncontrolled (older)</option><option value="t4" selected>Tier 4 &mdash; SCR + particulate filter</option></select><div class="hint" style="margin-top:6px">New prime engines must meet Tier 4 (SCR + particulate filter). Emergency engines are exempt and run limited hours.</div></div>
-      <div class="s-field"><label>Location air quality</label><select id="d_loc" onchange="dieselCalc()"><option value="att">Clean-air (attainment) area</option><option value="na_mod">Smoggy (ozone nonattainment) area</option></select></div>
+      <div class="s-field"><label>Emission controls</label><select id="d_ctrl" onchange="dieselSetFactors();dieselCalc()"><option value="unc" selected>Uncontrolled / lean-burn combustion</option><option value="t4">With SCR + aftertreatment</option></select><div class="hint" style="margin-top:6px">SO&#8322; is set by fuel sulphur; NOx/PM by combustion design and any SCR/filter. The Cummins KTA50 units are non-certified with no aftertreatment &mdash; confirm the emissions data sheet with the distributor.</div></div>
+      <div class="s-field"><label>Airshed status</label><select id="d_loc" onchange="dieselCalc()"><option value="nond" selected>Non-degraded (clean) airshed</option><option value="deg">Degraded / ecologically sensitive airshed</option></select></div>
     </div>
     </div>
     <div>
-      <div class="s-hero" id="d_hero"><h2>Permitting outlook &mdash; diesel engines</h2><div class="lane" id="d_lane">&mdash;</div><p id="d_summary"></p></div>
+      <div id="d-ov">
+      <div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;margin-bottom:16px">
+        <div class="s-hero" id="d_hero" style="flex:1 1 340px;margin-bottom:0"><h2>Permitting outlook &mdash; diesel engines</h2><div class="lane" id="d_lane">&mdash;</div><p id="d_summary"></p></div>
+        <details id="d_glosscard" class="s-card" style="flex:0 0 300px;margin-top:0">
+          <summary>Key terms (plain English)</summary>
+          <div class="gloss">
+            <div><b>IFC / World Bank EHS Guidelines</b> &mdash; the international environmental standards used here instead of U.S. permits, because the engines aren&rsquo;t for the Texas plant.</div>
+            <div><b>EGV (Emission Guideline Value)</b> &mdash; the limit the engine&rsquo;s exhaust must meet (e.g. NOx 1,460 mg/Nm&#179;).</div>
+            <div><b>mg/Nm&#179;</b> &mdash; milligrams of pollutant per normal cubic metre of exhaust: a <i>concentration</i>, and the basis for the IFC stack limits (at 15% O&#8322;).</div>
+            <div><b>ESIA</b> &mdash; Environmental &amp; Social Impact Assessment: the study of a project&rsquo;s effects, done before approval.</div>
+            <div><b>ESMP</b> &mdash; Environmental &amp; Social Management Plan: the plan to reduce and monitor those effects.</div>
+            <div><b>Category A / B / C</b> &mdash; IFC&rsquo;s risk tiers: A = potentially major impacts (full ESIA), B = limited, C = minimal.</div>
+            <div><b>Significant source</b> &mdash; a plant big enough (NOx/SO&#8322; &ge;500 tpy, PM10 &ge;50 tpy, or &ge;50 MWth) to require a detailed air-quality study.</div>
+            <div><b>Airshed</b> &mdash; the local body of air. <b>Non-degraded</b> = still clean; <b>degraded</b> = already polluted (stricter rules).</div>
+            <div><b>Dispersion modelling</b> &mdash; software (AERMOD / ADMS) that predicts where the exhaust lands and the ground-level concentration.</div>
+            <div><b>25% rule</b> &mdash; in a clean airshed a project should add no more than a quarter of the air-quality limit, leaving room for others.</div>
+            <div><b>WHO ambient guidelines</b> &mdash; health-based outdoor air-quality targets the project must not breach.</div>
+            <div><b>SCR</b> &mdash; Selective Catalytic Reduction: an add-on that removes NOx.</div>
+            <div><b>MWth</b> &mdash; megawatts of heat (fuel energy) input, used for the size class. &nbsp; <b>tpy</b> &mdash; tons per year.</div>
+            <div><b>NOx</b> &mdash; nitrogen oxides (smog-forming). &nbsp; <b>SO&#8322;</b> &mdash; sulphur dioxide.</div>
+            <div><b>PM10</b> &mdash; particulate matter: tiny soot and dust particles 10 micrometres or smaller (about 1/7 the width of a hair) that lodge deep in the lungs. <b>PM2.5</b> is the even finer, more harmful fraction.</div>
+            <div><b>Stack height (GEP)</b> &mdash; how tall the exhaust stack must be so fumes aren&rsquo;t dragged down by nearby buildings. IFC uses the Good Engineering Practice rule (building height + 1.5 &times; its smaller side); a taller stack can&rsquo;t be used to dodge the emission limits.</div>
+          </div>
+        </details>
+      </div>
       <div class="s-card">
         <h3>What this means</h3>
         <div class="s-kpi">
           <div class="box"><div class="v" id="d_time">&mdash;</div><div class="l">Typical timeline</div></div>
           <div class="box"><div class="v" id="d_review">&mdash;</div><div class="l">Review type</div></div>
-          <div class="box"><div class="v" id="d_op">&mdash;</div><div class="l">Operating permit</div></div>
+          <div class="box"><div class="v" id="d_op">&mdash;</div><div class="l">Public disclosure</div></div>
           <div class="box"><div class="v" id="d_cost">&mdash;</div><div class="l">Relative cost</div></div>
         </div>
         <div style="margin-top:14px;font-size:12px;font-weight:700;color:var(--mut)">Effort &amp; burden</div>
@@ -521,7 +550,7 @@
         <p class="foot" style="margin-top:8px">Very rough order-of-magnitude for planning only &mdash; replace with consultant &amp; vendor quotes. Excludes engine and balance-of-plant cost.</p>
       </div>
       <div class="s-card" style="margin-top:18px">
-        <h3>Emissions vs. permitting limits</h3>
+        <h3>Is anything over the IFC limit?</h3>
         <div id="d_chart"></div>
       </div>
       <div class="s-card" style="margin-top:18px">
@@ -529,9 +558,86 @@
         <table class="s-emit"><thead><tr><th>Pollutant</th><th id="de_unit">Per year (tons)</th><th>Status</th></tr></thead><tbody id="d_emitbody"></tbody></table>
         <p class="foot" style="margin-top:8px">Estimated for the selected duty. Diesel engines emit far more NOx and fine particles per unit than gas turbines.</p>
       </div>
+      </div>
+      <div id="d-tech" style="display:none">
+      <div class="s-card">
+        <h3>Engine snapshot</h3>
+        <div class="kv"><span>Rated power / unit</span><span id="dt_kw">&mdash;</span></div>
+        <div class="kv"><span>Power / unit (bhp)</span><span id="dt_hp">&mdash;</span></div>
+        <div class="kv"><span>Heat input / unit (HHV)</span><span id="dt_heat">&mdash;</span></div>
+        <div class="kv"><span>Total plant heat input</span><span id="dt_theat">&mdash;</span></div>
+        <div class="kv"><span>Capacity factor (from hours)</span><span id="dt_cf">&mdash;</span></div>
+        <div class="kv" style="border:none"><span>IFC facility class</span><span id="dt_size">&mdash;</span></div>
+        <details class="adv" style="margin-top:10px"><summary>Advanced emission factors (g/hp-hr)</summary>
+          <p class="hint" style="margin:6px 0 4px">Defaults: <b>Cummins KTA50-G3 Exhaust Emissions Data Sheet</b> &mdash; prime power, 1500&nbsp;rpm / 50&nbsp;Hz (CPL&nbsp;2227). SO&#8322; shown for ULSD (&le;15&nbsp;ppm S); scale with the actual fuel sulphur. Used to estimate annual tonnage (tpy) for the significant-source test &mdash; switch the control selector to &ldquo;With SCR/aftertreatment&rdquo; for controlled rates, or enter your unit&rsquo;s exact figures.</p>
+          <div class="row2"><div><label>NOx</label><input id="df_nox" type="number" step="0.01" value="11" oninput="dieselCalc()"></div><div><label>CO</label><input id="df_co" type="number" step="0.01" value="2.70" oninput="dieselCalc()"></div></div>
+          <div class="row2"><div><label>VOC</label><input id="df_voc" type="number" step="0.01" value="0.12" oninput="dieselCalc()"></div><div><label>PM2.5</label><input id="df_pm" type="number" step="0.01" value="0.09" oninput="dieselCalc()"></div></div>
+          <div class="row2"><div><label>SO2 <span class="hint">(≤1.5% S)</span></label><input id="df_so2" type="number" step="0.001" value="0.005" oninput="dieselCalc()"></div><div></div></div>
+          <p class="hint" style="margin:12px 0 4px;border-top:1px solid #e3e8ee;padding-top:10px"><b>NOx stack concentration &mdash; for the IFC limit test.</b> The NOx EGV is a concentration at 15% O&#8322;, so enter the engine&rsquo;s certified NOx concentration and the O&#8322; it&rsquo;s referenced to; the tool corrects it to 15% O&#8322; and judges pass/fail dynamically. KTA50-G3 data sheet: <b>5,500&nbsp;mg/m&#179; @5% O&#8322;</b>.</p>
+          <div class="row2"><div><label>NOx conc. <span class="hint">mg/m&#179;</span></label><input id="df_noxc" type="number" step="1" value="5500" oninput="dieselCalc()"></div><div><label>referenced at <span class="hint">% O&#8322;</span></label><input id="df_o2" type="number" step="0.1" value="5" oninput="dieselCalc()"></div></div>
+        </details>
+      </div>
+      <details class="s-card" id="d_snapcard" style="margin-top:18px"><summary style="cursor:pointer;font-weight:700;color:var(--navy)">How these numbers are calculated</summary><div id="d_snapmath" style="margin-top:10px"></div></details>
+      <div class="s-card" style="margin-top:18px"><h3>Regulatory determinations</h3><div id="dt_verdicts"></div></div>
+      <div class="s-card" style="margin-top:18px">
+        <h3>Potential to emit &mdash; all units</h3>
+        <table><thead><tr><th>Pollutant</th><th id="dt_ulb">lb/hr&middot;unit</th><th id="dt_utpy">tpy (plant)</th><th>vs limits</th></tr></thead><tbody id="dt_emitbody"></tbody></table>
+        <p class="foot">PTE at the selected hours. Red &ge; the IFC significant-source threshold (NOx/SO&#8322; 500 tpy, PM10 50 tpy) &middot; amber &ge; half &middot; green below. Heat input &ge;50 MWth is significant regardless of tonnage.</p>
+      </div>
+      <div class="s-card" style="margin-top:18px">
+        <h3>Stack height (IFC / GIIP)</h3>
+        <p class="foot" style="margin-top:-2px;margin-bottom:10px">IFC sets the minimum stack height by <b>Good International Industry Practice (GEP)</b> &mdash; tall enough that exhaust isn&rsquo;t dragged down by nearby buildings (&ldquo;downwash&rdquo;) and ground-level air stays clean. A taller stack <b>cannot</b> be used to dilute past the emission limits.</p>
+        <div class="row2">
+          <div><label>Nearby building height <span class="hint">(m)</span></label><input id="d_bh" type="number" step="0.5" value="12" oninput="stackCalc()"></div>
+          <div><label>Nearby building width <span class="hint">(m)</span></label><input id="d_bw" type="number" step="0.5" value="30" oninput="stackCalc()"></div>
+        </div>
+        <div class="kv" style="margin-top:10px"><span>Minimum GEP stack height&nbsp;&nbsp;(H + 1.5 &times; L)</span><span id="d_gep">&mdash;</span></div>
+        <p class="foot" id="d_stacknote" style="margin-top:8px"></p>
+        <p class="foot">GEP per US 40 CFR 51.100(ii), adopted by the IFC General EHS Guidelines (Annex 1.1.3). H = nearby building height; L = the lesser of that building&rsquo;s height or width (structures within 5L and under 800 m). Final height also depends on terrain, meteorology, predicted impacts and where people/receptors are &mdash; confirm by dispersion modelling.</p>
+      </div>
+      <div class="s-card" style="margin-top:18px"><h3>Your permitting lane</h3>
+        <p class="foot" style="margin-top:-2px;margin-bottom:10px">The four boxes are the IFC project categories, ordered <b>lightest &rarr; heaviest</b>. &ldquo;Heavier&rdquo; means more <b>assessment, modelling, disclosure, time and cost</b> before financing/approval. Your inputs decide which box applies (the highlighted one) &mdash; the goal is the <b>lightest category your emissions and airshed allow</b>, which is why adding controls or siting in a cleaner airshed can move you down a lane.</p>
+        <div class="lanes" id="dt_lanes"></div><p class="foot" id="dt_lanenote"></p>
+        <div style="margin-top:14px">
+          <div style="font-size:12px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">What actually gets &ldquo;heavier&rdquo; across the categories</div>
+          <table class="cmp">
+            <thead><tr><th>&nbsp;</th><th>Category C<br><span>&#9664; lightest</span></th><th>Category B</th><th>Category A</th><th>Category A + controls/offsets<br><span>heaviest &#9654;</span></th></tr></thead>
+            <tbody>
+              <tr><td>Typical timeline</td><td>weeks</td><td>1&ndash;3 months</td><td>6&ndash;12 months</td><td>12&ndash;24 months</td></tr>
+              <tr><td>Assessment depth</td><td>screening only</td><td>limited ESIA</td><td>full ESIA</td><td>full ESIA + alternatives analysis</td></tr>
+              <tr><td>Air-dispersion modelling</td><td>none</td><td>screening (SCREEN3/AIRSCREEN)</td><td>refined (AERMOD/ADMS)</td><td>refined + PSD-style increment analysis</td></tr>
+              <tr><td>Ambient demonstration</td><td>not required</td><td>basic</td><td>&le;25% of the standard (non-degraded)</td><td>minimise increment to a fraction of standard</td></tr>
+              <tr><td>Stakeholder engagement &amp; disclosure</td><td>no</td><td>limited</td><td>yes &mdash; &ge;60-day disclosure</td><td>yes + ongoing engagement</td></tr>
+              <tr><td>Emission controls</td><td>meet EGVs</td><td>meet EGVs</td><td>meet EGVs (tighten as needed)</td><td>best-available (e.g. SCR) beyond EGVs + offsets</td></tr>
+              <tr><td>Best fit</td><td>emergency / standby</td><td>small prime source, clean airshed</td><td>significant source</td><td>significant source in a sensitive airshed</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
       <div class="s-card" style="margin-top:18px">
         <h3>Diesel engine rules</h3>
         <ul class="s-list" id="d_rules"></ul>
+      </div>
+      <details class="law" open><summary>IFC / World Bank EHS Guidelines &mdash; Small Combustion Facilities (3&ndash;50 MWth)</summary><div>The General EHS Guidelines set <b>emission guideline values (EGVs)</b> for engines by fuel and type. For a <b>liquid-fuel, compression-ignition (diesel) engine</b> with a cylinder bore &lt;400&nbsp;mm (the Cummins KTA50 bore &asymp; 159&nbsp;mm): <b>NOx 1,460&nbsp;mg/Nm&#179;</b> (up to 1,600 if justified to keep high efficiency) and <b>PM 50&nbsp;mg/Nm&#179;</b> (up to 100 if justified), expressed at <b>15% O&#8322;, dry, 0&nbsp;&deg;C, 1&nbsp;atm</b>. <b>SO&#8322;</b> is controlled through fuel quality &mdash; diesel with <b>&le;1.5% sulphur</b> (up to 3.0% only if justified). The MWth category applies to the <b>whole facility</b> (all units on a common stack), and the EGVs apply to facilities running <b>&gt;500&nbsp;hr/yr at &gt;30% capacity factor</b>. Facilities <b>&ge;50&nbsp;MWth</b> instead follow the stricter, project-specific <b>Thermal Power Plant EHS Guidelines</b>. <b>Reality check for the KTA50-G3:</b> its data sheet certifies prime NOx of 5,500&nbsp;mg/m&#179; at 5% O&#8322; (&asymp; 2,040&nbsp;mg/Nm&#179; at 15% O&#8322;), about 40% above the 1,460 guideline &mdash; so the uncontrolled engine does <b>not</b> meet the NOx EGV and needs combustion tuning or SCR. PM (&asymp;13&nbsp;mg/Nm&#179;) and SO&#8322; (fuel-driven) comfortably pass.</div></details>
+      <details class="law"><summary>WHO Ambient Air Quality Guidelines &amp; the 25% contribution rule</summary><div>Beyond the stack limits, emissions must not cause ambient concentrations to reach or exceed the applicable standards &mdash; national standards, or in their absence the <b>WHO Air Quality Guidelines</b>: NO&#8322; 40&nbsp;&micro;g/m&#179; (annual) / 200 (1-hr); PM10 20 (annual) / 50 (24-hr); PM2.5 10 (annual) / 25 (24-hr); SO&#8322; 20 (24-hr) / 500 (10-min). In a <b>non-degraded airshed</b>, a project should contribute <b>&le;25%</b> of the standard to leave room for future development; in a <b>degraded / ecologically sensitive airshed</b> the increment must be minimised. A source is <b>&ldquo;significant&rdquo;</b> &mdash; triggering baseline monitoring and dispersion modelling (SCREEN3/AIRSCREEN, then AERMOD/ADMS) &mdash; at a net increase of <b>NOx 500&nbsp;tpy, SO&#8322; 500&nbsp;tpy, PM10 50&nbsp;tpy</b>, or a heat input of <b>&ge;50&nbsp;MWth</b>.</div></details>
+      <details class="law"><summary>Environmental &amp; Social assessment (IFC PS1 / project categorisation)</summary><div>Under IFC Performance Standard 1 a project is categorised by the significance of its impacts: <b>Category A</b> (potentially significant, diverse or irreversible &mdash; full ESIA, refined modelling, stakeholder engagement and public disclosure, generally &ge;60 days); <b>Category B</b> (limited, site-specific, largely reversible &mdash; a limited ESIA and ESMP); <b>Category C</b> (minimal or no adverse impacts &mdash; screening and a simple ESMP). The assessment produces an <b>Environmental &amp; Social Management Plan (ESMP)</b> with mitigation, monitoring and reporting against the EHS guideline values.</div></details>
+      <details class="law"><summary>Stack height &mdash; IFC Good International Industry Practice (GIIP / GEP)</summary><div>IFC requires every emission stack &mdash; significant or not &mdash; to be designed by <b>Good International Industry Practice</b> so exhaust isn&rsquo;t pulled down by building <b>downwash</b>, wakes or eddies, keeping ground-level concentrations low (General EHS Guidelines, Annex 1.1.3). The minimum &ldquo;<b>Good Engineering Practice</b>&rdquo; height follows the US 40 CFR 51.100(ii) formula <b>H<sub>GEP</sub> = H + 1.5&nbsp;L</b>, where H is the height of a nearby building and L is that building&rsquo;s lesser dimension (height or width); &ldquo;nearby&rdquo; means within 5L and under 800&nbsp;m. For larger plants (<b>&ge;50&nbsp;MWth</b>) the <b>Thermal Power Plant EHS Guidelines</b> give indicative GIIP heights of up to about <b>80&nbsp;m for diesel-engine plants</b>, ~100&nbsp;m for gas combined-cycle and ~200&nbsp;m for large coal. Crucially, <b>raising the stack must not be used to allow higher emissions</b> &mdash; it only improves local dispersion; the emission guideline values and the 25% / WHO ambient tests still apply and are confirmed by dispersion modelling.</div></details>
+      <details class="law"><summary>Assessment &amp; approval next steps (IFC)</summary><div id="dt_next"></div></details>
+      <div class="s-card" style="margin-top:18px;border-left:5px solid var(--amber)">
+        <h3 style="color:var(--amber)">&#9888; Compliance traps &amp; cross-checks</h3>
+        <p class="foot" style="margin-top:-4px;margin-bottom:10px">Things this screen can&rsquo;t catch that move an engine project into a heavier category. Walk these with a qualified environmental consultant.</p>
+        <ul style="font-size:13.5px;color:#3a4757;margin:0;padding-left:18px;line-height:1.65">
+          <li><b>You can&rsquo;t split the units.</b> The MWth size class and the significant-source tonnage apply to the <b>whole facility</b> &mdash; all units reasonably considered to share a common stack are summed. Four engines aren&rsquo;t four separate small sources.</li>
+          <li><b>EGVs only formally bind &gt;500 hr/yr &amp; &gt;30% load.</b> Emergency/standby engines fall outside the guideline-value trigger, but lenders and host countries usually still expect the limits met as good practice.</li>
+          <li><b>g/bhp&middot;hr vs mg/Nm&#179;.</b> The tonnage here uses mass emission factors (AP-42) to test the significant-source thresholds. The stack limits (NOx 1,460, PM 50 mg/Nm&#179;) are <b>concentration-based at 15% O&#8322;</b> &mdash; convert the engine&rsquo;s certified data to mg/Nm&#179; before claiming compliance.</li>
+          <li><b>Bore size sets the NOx limit.</b> &lt;400 mm &rarr; 1,460 mg/Nm&#179;; &ge;400 mm &rarr; 1,850. The KTA50 bore &asymp;159 mm, but confirm the actual unit.</li>
+          <li><b>Fuel choice changes everything.</b> Gas/dual-fuel operation uses different NOx limits (200 SI / 400 dual-fuel / 1,600 CI-gas mg/Nm&#179;). SO&#8322; is governed by <b>fuel sulphur</b> (&le;1.5% S) &mdash; high-sulphur HFO would blow past the intent; use low-sulphur diesel.</li>
+          <li><b>Ambient modelling is often the binding constraint.</b> You can sit below 500 tpy yet still fail the 25% / WHO ambient test in a populated area or in valley/complex terrain &mdash; a taller stack or SCR may be required regardless of tonnage.</li>
+          <li><b>Degraded / sensitive airshed overrides the table.</b> It triggers stricter-than-guideline controls and minimising the increment, even for a modest source.</li>
+          <li><b>IFC is a floor, not the only law.</b> The host country&rsquo;s own EIA standards, or lender requirements (Equator Principles, a specific DFI), can be tighter and may govern. Confirm <b>which framework actually applies</b> before relying on these values.</li>
+        </ul>
+      </div>
+      <p class="foot" style="max-width:none;margin-top:14px"><b>Disclaimer.</b> Planning screen against the <b>IFC / World Bank Group EHS Guidelines</b> (General EHS &mdash; Air Emissions &amp; Ambient Air Quality, Small Combustion Facilities; Thermal Power Plants) and the <b>WHO Air Quality Guidelines</b> &mdash; not a regulatory determination or legal advice. Emission factors are AP-42 defaults for tonnage screening; replace with the Cummins Engine Emissions Data sheet and convert to mg/Nm&#179; @15% O&#8322;. Confirm the governing framework (host-country EIA law, lender / Equator Principles, specific DFI) and have a qualified environmental consultant run the ESIA and dispersion modelling. &nbsp;|&nbsp; Sources: IFC General EHS Guidelines &mdash; Air Emissions &amp; Ambient Air Quality (2007), Table 1.1.2 &amp; WHO ambient table; IFC EHS Guidelines for Thermal Power Plants (2008); IFC Performance Standard 1.</p>
       </div>
     </div>
   </div>
@@ -539,25 +645,25 @@
     <div class="cmphead"><h3>Compare scenarios</h3><div><button onclick="clearCompare()" class="cmpbtn" style="background:#eef2f7;color:var(--navy)">Clear</button> <button onclick="addCompare('diesel')" class="cmpbtn">+ Add current scenario</button></div></div>
     <div id="d_compare_body"></div>
   </div>
-  <p class="foot" style="max-width:none">Plain-language screen for diesel reciprocating engines (Cummins KTA / QSK). Federal rules: NSPS Subpart IIII and NESHAP Subpart ZZZZ. Not a permit determination &mdash; confirm with a licensed Texas air-permitting consultant.</p>
+  <p class="foot" style="max-width:none">Plain-language screen for diesel reciprocating engines (Cummins KTA / QSK) against the <b>IFC / World Bank Group EHS Guidelines</b> (General EHS &mdash; Small Combustion 3&ndash;50 MWth; Thermal Power for &ge;50 MWth) and WHO Air Quality Guidelines. International (non-U.S.) basis &mdash; not a regulatory determination; confirm with a qualified environmental consultant and the host-country authority.</p>
 </div>
 </div>
 <script>
 const PRESETS = [
-  {g:"GE Vernova", n:"GE Frame 6B (PG6561B / MS6001B, legacy) — ~40 MW", mw:40, hr:10630},
-  {g:"GE Vernova", n:"GE 6B.03 (uprated) — ~45 MW", mw:45, hr:10216},
-  {g:"GE Vernova", n:"GE Frame 5 (MS5001P) — ~26 MW", mw:26, hr:12600},
-  {g:"GE Vernova", n:"GE Frame 7EA (MS7001EA) — ~85 MW", mw:85, hr:10480},
-  {g:"GE Vernova", n:"GE Frame 6F.03 — ~88 MW", mw:88, hr:9800},
-  {g:"GE Vernova", n:"GE Frame 7F.05 — ~239 MW", mw:239, hr:8900},
-  {g:"Siemens Energy", n:"Siemens SGT-600 — ~25 MW", mw:25, hr:9980},
-  {g:"Siemens Energy", n:"Siemens SGT-700 — ~33 MW", mw:33, hr:9367},
-  {g:"Siemens Energy", n:"Siemens SGT-750 — ~38 MW", mw:38, hr:8811},
-  {g:"Siemens Energy", n:"Siemens SGT-800 — ~62 MW", mw:62, hr:8302},
-  {g:"Siemens Energy", n:"Siemens SGT5-2000E — ~198 MW", mw:198, hr:9083},
-  {g:"Siemens Energy", n:"Siemens SGT6-5000F — ~260 MW", mw:260, hr:8531},
-  {g:"Siemens Energy", n:"Siemens SGT5-4000F — ~329 MW", mw:329, hr:8322},
-  {g:"Other", n:"Custom (enter values)", mw:null, hr:null},
+  {g:"GE Vernova", n:"GE 6B (PG6561B, legacy) — 40 MW", mw:40, hr:10630},
+  {g:"GE Vernova", n:"GE 6B.03 (uprated) — 45 MW", mw:45, hr:10216},
+  {g:"GE Vernova", n:"GE Frame 5 — 26 MW", mw:26, hr:12600},
+  {g:"GE Vernova", n:"GE 7EA — 85 MW", mw:85, hr:10480},
+  {g:"GE Vernova", n:"GE 6F.03 — 88 MW", mw:88, hr:9800},
+  {g:"GE Vernova", n:"GE 7F.05 — 239 MW", mw:239, hr:8900},
+  {g:"Siemens Energy", n:"Siemens SGT-600 — 25 MW", mw:25, hr:9980},
+  {g:"Siemens Energy", n:"Siemens SGT-700 — 33 MW", mw:33, hr:9367},
+  {g:"Siemens Energy", n:"Siemens SGT-750 — 38 MW", mw:38, hr:8811},
+  {g:"Siemens Energy", n:"Siemens SGT-800 — 62 MW", mw:62, hr:8302},
+  {g:"Siemens Energy", n:"Siemens SGT5-2000E — 198 MW", mw:198, hr:9083},
+  {g:"Siemens Energy", n:"Siemens SGT6-5000F — 260 MW", mw:260, hr:8531},
+  {g:"Siemens Energy", n:"Siemens SGT5-4000F — 329 MW", mw:329, hr:8322},
+  {g:"Other", n:"Custom", mw:null, hr:null},
 ];
 const sel=document.getElementById('preset');
 const _grp={};
@@ -599,7 +705,7 @@ function applyUnitLabels(sys){
 function setUnits(sys){
   if(sys===UNIT) return;
   for(const id in FCONV){const el=$(id); let v=parseFloat(el.value)||0; v=(sys==='si')?v*FCONV[id]:v/FCONV[id]; el.value=+v.toPrecision(6);}
-  UNIT=sys; applyUnitLabels(sys); calc();
+  UNIT=sys; applyUnitLabels(sys); calc(); if(typeof dieselCalc==='function') dieselCalc();
 }
 
 // ---- Remember settings between visits (localStorage) ----
@@ -914,25 +1020,36 @@ function buildChart(rows, si){
   if(!crit.length) return '';
   const disp=crit.map(r=>({k:r.k,t:r.t,d:conv(r.t)}));
   const t100=conv(100), t250=conv(250);
-  let maxv=t250*1.15; disp.forEach(x=>{ if(x.d>maxv) maxv=x.d*1.05; });
-  const L=120, RX=585, W=RX-L, top=44, rowH=26, h=top+crit.length*rowH+16;
+  let maxv=t250*1.3; disp.forEach(x=>{ if(x.d>maxv) maxv=x.d*1.05; }); if(maxv>t250*1.8) maxv=t250*1.8;
+  const L=120, RX=585, W=RX-L, top=50, rowH=26, h=top+crit.length*rowH+16;
   const xf=v=>L+(v/maxv)*W;
   const short={'NOx':'NOx','CO':'CO','VOC':'VOC','PM2.5 / PM10':'PM2.5','SO2':'SO2','H2SO4 mist':'H2SO4'};
   let g='<svg viewBox="0 0 600 '+h+'" width="100%" font-family="Segoe UI,Arial" font-size="12">';
-  [[t100,'#b97b00','Operating permit (100)'],[t250,'#c0392b','Major / federal (250)']].forEach(rl=>{
-    const x=xf(rl[0]);
-    g+='<line x1="'+x+'" y1="'+(top-6)+'" x2="'+x+'" y2="'+(h-14)+'" stroke="'+rl[1]+'" stroke-width="1.5" stroke-dasharray="4 3"/>';
-    g+='<text x="'+x+'" y="'+(top-10)+'" fill="'+rl[1]+'" text-anchor="middle" font-weight="700" font-size="10">'+rl[2]+'</text>';
-  });
+  var U=(si?' t/yr':' tpy'), x1=xf(t100), x2=xf(t250), yT=top-8, yB=h-14;
+  // shaded permitting zones (behind bars)
+  g+='<rect x="'+L+'" y="'+yT+'" width="'+(x1-L)+'" height="'+(yB-yT)+'" fill="#1b8a4b" opacity="0.07"/>';
+  g+='<rect x="'+x1+'" y="'+yT+'" width="'+(x2-x1)+'" height="'+(yB-yT)+'" fill="#e0a200" opacity="0.13"/>';
+  g+='<rect x="'+x2+'" y="'+yT+'" width="'+(RX-x2)+'" height="'+(yB-yT)+'" fill="#c0392b" opacity="0.08"/>';
+  function zlab(xa,xb,txt,col){ if((xb-xa)>=44){ g+='<text x="'+((xa+xb)/2)+'" y="35" fill="'+col+'" text-anchor="middle" font-weight="700" font-size="9.5">'+txt+'</text>'; } }
+  zlab(L,x1,'Minor source','#1b8a4b'); zlab(x1,x2,'Title V','#b97b00'); zlab(x2,RX,'PSD major source','#c0392b');
+  // short line markers (fixed legend, top-left)
+  g+='<line x1="'+L+'" y1="16" x2="'+(L+20)+'" y2="16" stroke="#b97b00" stroke-width="2.5" stroke-dasharray="4 3"/>';
+  g+='<text x="'+(L+25)+'" y="20" fill="#b97b00" font-weight="700" font-size="10">'+Math.round(t100)+U+' = operating permit</text>';
+  g+='<line x1="'+(L+205)+'" y1="16" x2="'+(L+225)+'" y2="16" stroke="#c0392b" stroke-width="2.5" stroke-dasharray="4 3"/>';
+  g+='<text x="'+(L+230)+'" y="20" fill="#c0392b" font-weight="700" font-size="10">'+Math.round(t250)+U+' = major source</text>';
+  // dashed limit lines
+  g+='<line x1="'+x1+'" y1="'+yT+'" x2="'+x1+'" y2="'+yB+'" stroke="#b97b00" stroke-width="1.5" stroke-dasharray="4 3"/>';
+  g+='<line x1="'+x2+'" y1="'+yT+'" x2="'+x2+'" y2="'+yB+'" stroke="#c0392b" stroke-width="1.5" stroke-dasharray="4 3"/>';
   disp.forEach((r,i)=>{
     const y=top+i*rowH;
     const col=r.t>=250?'#c0392b':(r.t>=100?'#e0a200':'#1b8a4b');
-    const bx=Math.max(1,xf(r.d)-L);
+    const be=Math.min(xf(r.d),RX);
+    const bx=Math.max(1,be-L);
     g+='<text x="8" y="'+(y+14)+'" fill="#3a4757" font-weight="700">'+(short[r.k]||r.k)+'</text>';
     g+='<rect x="'+L+'" y="'+(y+3)+'" width="'+bx+'" height="14" rx="3" fill="'+col+'"/>';
     const lbl=r.d.toLocaleString('en-US',{maximumFractionDigits:0});
-    if(xf(r.d)>RX-44) g+='<text x="'+(xf(r.d)-5)+'" y="'+(y+14)+'" fill="#fff" font-size="11" text-anchor="end" font-weight="700">'+lbl+'</text>';
-    else g+='<text x="'+(xf(r.d)+5)+'" y="'+(y+14)+'" fill="#3a4757" font-size="11">'+lbl+'</text>';
+    if(be>RX-46) g+='<text x="'+(be-5)+'" y="'+(y+14)+'" fill="#fff" font-size="11" text-anchor="end" font-weight="700">'+lbl+'</text>';
+    else g+='<text x="'+(be+5)+'" y="'+(y+14)+'" fill="#3a4757" font-size="11">'+lbl+'</text>';
   });
   g+='<line x1="'+L+'" y1="'+(h-14)+'" x2="'+RX+'" y2="'+(h-14)+'" stroke="#cfd8e3"/>';
   g+='<text x="'+RX+'" y="'+(h-2)+'" fill="#8a99a8" font-size="10" text-anchor="end">'+(si?'tonnes/yr':'tons/yr')+'</text>';
@@ -1003,9 +1120,10 @@ function addCompare(kind){
   let snap;
   if(kind==='diesel'){
     const u=document.getElementById('d_units').value, kw=document.getElementById('d_kw').value;
-    const ctrl=document.getElementById('d_ctrl').value==='t4'?'Tier 4':'uncontrolled';
+    const ctrl=document.getElementById('d_ctrl').value==='t4'?'SCR':'uncontrolled';
     const duty=parseFloat(document.getElementById('d_duty').value)<=200?'Emergency':'Prime';
-    snap={label:'Diesel · '+u+'×'+kw+'kW · '+ctrl+' · '+duty+' · '+USABBR, lane:gv('d_lane'), time:gv('d_months'), cost:gv('d_permitcost'), op:gv('d_op')};
+    const air=document.getElementById('d_loc').value==='deg'?'degraded airshed':'non-degraded airshed';
+    snap={label:'Diesel · '+u+'×'+kw+'kW · '+ctrl+' · '+duty+' · '+air, lane:gv('d_lane'), time:gv('d_months'), cost:gv('d_permitcost'), op:gv('d_op')};
   } else {
     const u=$('units').value, mw=$('mw').value, nx=$('noxsel').value, c=$('cosel').value;
     const h=parseFloat($('hours').value)||0, duty=h>=8000?'Baseload':(h<=2000?'Peaking':h+'hr');
@@ -1034,61 +1152,223 @@ function setEquip(name){
   document.getElementById('eq-diesel').classList.toggle('active',name==='diesel');
   if(name==='diesel') dieselCalc();
 }
-const DPRE=[{n:"Cummins KTA50 — ~1,250 kW",kw:1250},{n:"Cummins QSK60 — ~2,000 kW",kw:2000},{n:"Cummins QSK95 — ~3,000 kW",kw:3000},{n:"Custom (enter kW)",kw:null}];
+const DPRE=[{n:"KTA50-G3 (prime, 60 Hz) — 1,300 kW",kw:1300},{n:"KTA50-G21 (prime, 50 Hz) — 1,567 kW",kw:1567},{n:"QSK60 — 2,000 kW",kw:2000},{n:"QSK95 — 3,000 kW",kw:3000},{n:"Custom (enter kW)",kw:null}];
+const DPROJ={perseus:{model:0,units:28},montage:{model:1,units:32}};
+function stackCalc(){
+  var bh=parseFloat((document.getElementById('d_bh')||{}).value)||0;
+  var bw=parseFloat((document.getElementById('d_bw')||{}).value)||0;
+  var gep=bh+1.5*Math.min(bh,bw);
+  var el=document.getElementById('d_gep'); if(el) el.textContent=gep.toFixed(1)+' m';
+}
+function loadDieselProject(){
+  var k=document.getElementById('d_project').value; var p=DPROJ[k]; if(!p) return;
+  setEquip('diesel');
+  document.getElementById('d_model').value=p.model;
+  document.getElementById('d_units').value=p.units;
+  document.getElementById('d_duty').value='8760';   // prime / continuous generation
+  document.getElementById('d_ctrl').value='unc';     // Cummins units non-certified, no aftertreatment
+  dieselSetFactors();
+  dieselModel();                                     // sets kW from the model + recalculates
+  dieselTab('ov');
+  try{window.scrollTo({top:0,behavior:'smooth'});}catch(e){}
+}
 (function(){const m=document.getElementById('d_model'); if(m) DPRE.forEach((p,i)=>{const o=document.createElement('option');o.value=i;o.textContent=p.n; if(i===1)o.selected=true; m.appendChild(o);});})();
-const DEF={unc:{NOx:4.8,CO:0.85,VOC:0.25,PM:0.10,SO2:0.006},t4:{NOx:0.50,CO:0.60,VOC:0.07,PM:0.020,SO2:0.006}};
-function dieselModel(){const p=DPRE[+document.getElementById('d_model').value]; if(p&&p.kw) document.getElementById('d_kw').value=p.kw; dieselCalc();}
+const DEF={unc:{NOx:11.0,CO:2.70,VOC:0.12,PM:0.09,SO2:0.005,NOxC:5500,O2:5},t4:{NOx:0.5,CO:0.25,VOC:0.07,PM:0.02,SO2:0.005,NOxC:250,O2:5}};
+function dieselTab(name){
+  document.getElementById('d-ov').style.display = name==='tech'?'none':'block';
+  document.getElementById('d-tech').style.display = name==='tech'?'block':'none';
+  document.getElementById('dsub-ov').classList.toggle('active',name!=='tech');
+  document.getElementById('dsub-tech').classList.toggle('active',name==='tech');
+}
+function dieselSetFactors(){var e=DEF[document.getElementById('d_ctrl').value]||DEF.t4; var m={df_nox:e.NOx,df_co:e.CO,df_voc:e.VOC,df_pm:e.PM,df_so2:e.SO2,df_noxc:e.NOxC,df_o2:e.O2}; for(var k in m){var el=document.getElementById(k); if(el) el.value=m[k];}}
+var IFC_NOX=1460, IFC_PM=50; // mg/Nm3 @15% O2 - liquid CI engine, bore <400mm
+function buildDieselChart(rows,si){
+  var items=[{k:'NOx',name:'NOx',thr:500},{k:'SO2',name:'SO\u2082',thr:500},{k:'PM2.5 / PM10',name:'PM10',thr:50}];
+  var UW=si?'t/yr':'tpy';
+  var data=items.map(function(it){var r=rows.find(function(x){return x.k===it.k;});var t=r?r.t:0;return {name:it.name,t:t,thr:it.thr,ratio:t/it.thr};});
+  var L=86, RXbar=512, statusX=596;          // RXbar = bar area; gutter (RXbar..statusX) reserved for OVER/OK
+  var plotW=RXbar-L;
+  var xLimit=L+0.52*plotW;
+  var capR=(RXbar-L)/(xLimit-L);
+  var top=64,rowH=40,h=top+data.length*rowH+34;
+  var barH=18;
+  var g='<svg viewBox="0 0 600 '+h+'" width="100%" font-family="Segoe UI,Arial" font-size="12">';
+  g+='<text x="8" y="18" fill="#1f3a56" font-weight="700" font-size="13">How close is each pollutant to its IFC limit?</text>';
+  g+='<text x="8" y="34" fill="#8a99a8" font-size="10.5">If a bar crosses the red line, that pollutant by itself needs a full air-quality study.</text>';
+  g+='<line x1="'+xLimit+'" y1="'+(top-10)+'" x2="'+xLimit+'" y2="'+(top+data.length*rowH-6)+'" stroke="#c0392b" stroke-width="1.6" stroke-dasharray="5 3"/>';
+  g+='<text x="'+xLimit+'" y="'+(top-14)+'" fill="#c0392b" font-size="10" text-anchor="middle" font-weight="700">IFC limit</text>';
+  data.forEach(function(d,i){
+    var y=top+i*rowH;
+    var over=d.ratio>=1;
+    var col=over?'#c0392b':(d.ratio>=0.5?'#e0a200':'#1b8a4b');
+    var drawR=Math.min(d.ratio,capR);
+    var be=L+drawR*(xLimit-L);
+    var bx=Math.max(2,be-L);
+    g+='<rect x="'+L+'" y="'+(y+2)+'" width="'+plotW+'" height="'+barH+'" rx="4" fill="#eef2f7"/>';
+    g+='<rect x="'+L+'" y="'+(y+2)+'" width="'+bx+'" height="'+barH+'" rx="4" fill="'+col+'"/>';
+    if(d.ratio>capR) g+='<text x="'+(RXbar-5)+'" y="'+(y+15)+'" fill="#fff" font-size="11" text-anchor="end" font-weight="700">\u25B6</text>';
+    g+='<text x="8" y="'+(y+16)+'" fill="#1f3a56" font-weight="700" font-size="12.5">'+d.name+'</text>';
+    var uval=si?d.t*TON:d.t, ulim=si?d.thr*TON:d.thr;
+    var vtxt=Math.round(uval).toLocaleString()+' '+UW+'  (limit '+Math.round(ulim).toLocaleString()+')';
+    g+='<text x="8" y="'+(y+30)+'" fill="#6b7886" font-size="10">'+vtxt+'</text>';
+    g+='<text x="'+statusX+'" y="'+(y+16)+'" fill="'+col+'" font-size="11.5" text-anchor="end" font-weight="700">'+(over?'OVER':'OK')+'</text>';
+  });
+  var fy=top+data.length*rowH+16;
+  var l500=si?Math.round(500*TON):500, l50=si?Math.round(50*TON):50;
+  g+='<text x="8" y="'+fy+'" fill="#8a99a8" font-size="10">Limits: NOx &amp; SO\u2082 '+l500.toLocaleString()+' '+UW+', PM10 '+l50.toLocaleString()+' '+UW+'. CO and VOC have no IFC tonnage limit.</text>';
+  g+='</svg>'; return g;
+}
+function dieselTech(R){
+  if(!document.getElementById('dt_kw')) return;
+  var si=(typeof UNIT!=='undefined'&&UNIT==='si');
+  document.getElementById('dt_kw').textContent=Math.round(R.kw).toLocaleString()+' kW';
+  document.getElementById('dt_hp').textContent=Math.round(R.hp).toLocaleString()+' bhp';
+  document.getElementById('dt_heat').textContent= si ? (R.heat*MWTH).toFixed(1)+' MW(th)' : R.heat.toFixed(1)+' MMBtu/hr';
+  document.getElementById('dt_theat').textContent= si ? R.mwth.toFixed(1)+' MW(th)' : (R.heat*R.units).toFixed(1)+' MMBtu/hr ('+R.mwth.toFixed(1)+' MWth)';
+  document.getElementById('dt_cf').textContent=(R.cf*100).toFixed(1)+'% ('+R.hours.toLocaleString()+' hr)';
+  document.getElementById('dt_size').textContent = R.large ? '≥50 MWth — Thermal Power EHS Guidelines' : '3–50 MWth — Small Combustion (Table 1.1.2)';
+  var sn=document.getElementById('d_stacknote');
+  if(sn) sn.innerHTML = R.large
+   ? 'This plant is <b>≥50 MWth</b>, so the <b>Thermal Power Plant EHS Guidelines</b> apply: indicative GIIP stack height up to <b>~80 m</b> for diesel-engine power plants (≈100 m for gas combined-cycle, ≈200 m for large coal). Use the larger of that and the GEP minimum, confirmed by modelling.'
+   : 'This plant is <b>&lt;50 MWth</b> (small combustion): size the stack to at least the GEP minimum above and confirm ground-level concentrations with screening dispersion modelling.';
+  if(typeof stackCalc==='function') stackCalc();
+  var sm=document.getElementById('d_snapmath');
+  if(sm){ sm.innerHTML=
+   '<div class="kv"><span>Power → bhp</span><span>'+Math.round(R.kw).toLocaleString()+' kW ÷ 0.7457 = '+Math.round(R.hp).toLocaleString()+' bhp</span></div>'+
+   '<div class="kv"><span>Heat input / unit</span><span>'+Math.round(R.hp).toLocaleString()+' bhp × 7,000 Btu/bhp·hr = '+R.heat.toFixed(1)+' MMBtu/hr</span></div>'+
+   '<div class="kv"><span>Plant heat input</span><span>'+R.heat.toFixed(1)+' × '+R.units+' units = '+(R.heat*R.units).toFixed(1)+' MMBtu/hr</span></div>'+
+   '<div class="kv"><span>→ MWth (÷ 3.412)</span><span>'+R.mwth.toFixed(1)+' MWth → '+(R.large?'≥50: Thermal Power':'3–50: Small Combustion')+'</span></div>'+
+   '<div class="kv"><span>Annual tonnage (tpy)</span><span>g/bhp·hr × bhp × '+R.hours.toLocaleString()+' hr × '+R.units+' ÷ 453.592 ÷ 2,000</span></div>'+
+   '<div class="kv" style="border:none"><span>Stack EGV basis</span><span>NOx '+IFC_NOX+' / PM '+IFC_PM+' mg/Nm³ @15% O₂; SO₂ via ≤1.5% S fuel</span></div>';
+  }
+  var V=document.getElementById('dt_verdicts'); V.innerHTML='';
+  function add(cls,h,p){V.innerHTML+='<div class="verdict '+cls+'"><h3>'+h+'</h3><p>'+p+'</p></div>';}
+  add(R.large?'v-warn':'v-ok','Facility class: '+(R.large?'≥50 MWth (Thermal Power)':'3–50 MWth (Small Combustion)'), R.large?('Total heat input '+R.mwth.toFixed(1)+' MWth ≥ 50 MWth → the <b>Thermal Power Plant EHS Guidelines</b> apply (project-specific, generally tighter) and the plant is automatically a significant source.'):('Total heat input '+R.mwth.toFixed(1)+' MWth → the <b>General EHS Guidelines, Small Combustion Facilities</b> (Table 1.1.2) set the emission guideline values.'));
+  var noxClass = (R.c15conc<=0)?'v-warn':(R.noxPass?'v-ok':'v-bad');
+  var applyNote = R.egvApplies
+    ? 'Operating &gt;500 hr/yr at &gt;30% load, so the guideline values <b>formally apply</b>.'
+    : 'At '+(R.cf*100).toFixed(0)+'% capacity factor / '+R.hours.toLocaleString()+' hr the guideline values do <b>not</b> formally bind (they apply &gt;500 hr/yr &amp; &gt;30% load) — apply them as good practice anyway.';
+  var noxBody;
+  if(R.c15conc>0){
+    var pct=Math.round((R.c15conc/IFC_NOX-1)*100);
+    var verdictTxt=R.noxPass?'PASS':('FAIL — '+pct+'% over');
+    noxBody='Entered NOx <b>'+Math.round(R.noxC).toLocaleString()+' mg/m³ @'+(+R.o2ref)+'% O₂</b> corrects to <b>'+Math.round(R.c15conc).toLocaleString()+' mg/Nm³ @15% O₂</b> [× (20.9−15)/(20.9−'+(+R.o2ref)+')] versus the <b>'+IFC_NOX+' mg/Nm³</b> guideline (liquid CI engine, bore &lt;400 mm) → <b style="color:'+(R.noxPass?'#1b8a4b':'#c0392b')+'">'+verdictTxt+'</b>. '+(R.noxPass?'':'NOx control (combustion tuning or SCR) is required to comply. ')+'PM guideline <b>'+IFC_PM+' mg/Nm³</b> and SO₂ via ≤1.5% S fuel apply on the same 15% O₂ basis. '+applyNote+' <span style="color:#5b6b7b">Cross-check: the '+R.noxEF+' g/bhp·hr factor ≈ <b>'+Math.round(R.c15ef).toLocaleString()+' mg/Nm³ @15% O₂</b> via EPA Method 19 (Fd 9,190 dscf/MMBtu, 7,000 Btu/bhp·hr) — an independent, assumption-sensitive estimate.</span>';
+  } else {
+    noxBody='Enter the engine’s certified NOx concentration and its reference O₂ in <b>Advanced emission factors</b> to test it against the <b>'+IFC_NOX+' mg/Nm³ @15% O₂</b> guideline. '+applyNote;
+  }
+  add(noxClass,'NOx stack limit: '+(R.c15conc<=0?'enter concentration':(R.noxPass?'meets EGV ✓':'over EGV ✗')), noxBody);
+  add(R.significant?'v-bad':'v-ok','Significant source: '+(R.significant?'YES':'no'), R.significant?('Net increase reaches an IFC significant-source trigger (NOx/SO₂ ≥500 tpy, PM10 ≥50 tpy, or ≥50 MWth) → baseline ambient monitoring + atmospheric <b>dispersion modelling</b> (SCREEN3 then AERMOD/ADMS) demonstrating compliance with WHO/national ambient standards.'):('All pollutants stay below the significant-source triggers (NOx/SO₂ 500 tpy, PM10 50 tpy) and the plant is &lt;50 MWth → a screening-level assessment generally suffices.'));
+  add(R.deg?'v-bad':'v-ok','Airshed: '+(R.deg?'degraded / sensitive':'non-degraded'), R.deg?('In a degraded or ecologically sensitive airshed, more stringent controls are expected and any increment must be minimised to a small fraction of the ambient standard.'):('In a non-degraded airshed the project should contribute ≤<b>25%</b> of the applicable ambient air-quality standard, preserving capacity for future development.'));
+  add('v-warn','Project category: '+["C","B","A","A"][R.lane], 'Mapped to IFC environmental categorisation — '+["Category C: minimal or no adverse impacts; screening + ESMP.","Category B: limited, site-specific, largely reversible impacts; limited ESIA + ESMP.","Category A: potentially significant adverse impacts; full ESIA, refined modelling, stakeholder engagement & disclosure.","Category A in a sensitive setting: full ESIA plus best-available controls/offsets and continuous monitoring."][R.lane]);
+  var ul=document.getElementById('dt_ulb'); if(ul) ul.textContent= si?'kg/hr·unit':'lb/hr·unit';
+  var ut=document.getElementById('dt_utpy'); if(ut) ut.textContent= si?'t/yr (plant)':'tpy (plant)';
+  var tb=document.getElementById('dt_emitbody'); tb.innerHTML='';
+  var thr={'NOx':500,'SO2':500,'PM2.5 / PM10':50};
+  R.rows.forEach(function(r){var t=thr[r.k]; var cls=(t&&r.t>=t)?'cellr':(t&&r.t>=t*0.5?'cella':'cellg');
+    var flag=t?(r.t>=t?'<span class="pill bad">≥'+t+'</span>':'<span class="pill ok">&lt;'+t+'</span>'):'<span class="pill ok">n/a</span>';
+    var lbD=si?r.lbhr*KG:r.lbhr, tD=si?r.t*TON:r.t;
+    tb.innerHTML+='<tr><td>'+r.k+'</td><td>'+lbD.toFixed(2)+'</td><td class="tpy '+cls+'">'+tD.toLocaleString('en-US',{maximumFractionDigits:1})+'</td><td>'+flag+'</td></tr>';});
+  var L=["Category C — screening + ESMP","Category B — limited ESIA","Category A — full ESIA","Category A — ESIA + controls/offsets"], tags=["Lightest","Limited","Full","Heaviest"];
+  var li=[
+   ["Minimal / no adverse impacts","Meet IFC engine guideline values","Environmental & Social Management Plan (ESMP)"],
+   ["Limited, site-specific impacts","Limited ESIA + ESMP","Screening dispersion model; meet guideline values"],
+   ["Significant source or degraded airshed","Full ESIA + refined modelling (AERMOD/ADMS)","Ambient demonstration + disclosure + monitoring"],
+   ["Significant source in a sensitive airshed","Best-available controls (SCR) beyond guideline values","Minimise increment; offsets + continuous monitoring"]
+  ];
+  var html=''; for(var i=0;i<4;i++){var act=i===R.lane; html+='<div class="lane '+(act?'active':(i<R.lane?'dim':''))+'"><span class="tag">'+tags[i]+'</span><h4>'+(act?'➤ ':'')+L[i]+'</h4><ul>'+li[i].map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul></div>';}
+  document.getElementById('dt_lanes').innerHTML=html;
+  document.getElementById('dt_lanenote').innerHTML='<b>'+["Lightest path — minimal-impact / emergency engines in a clean airshed.","Limited ESIA for a small, non-significant source.","Full ESIA — significant source or degraded airshed.","Heaviest path — significant source in a degraded/sensitive airshed; best-available controls and offsets."][R.lane]+'</b>';
+  var nx=document.getElementById('dt_next');
+  if(nx && !nx.getAttribute('data-done')){ nx.innerHTML='<ol class="steps"><li><b>Screen &amp; categorise</b> the project (A / B / C) against the IFC Performance Standards and host-country requirements.</li><li>Establish <b>baseline ambient air quality</b> (NO₂, SO₂, PM10/PM2.5) for the airshed and judge degraded vs non-degraded.</li><li>Run <b>atmospheric dispersion modelling</b> — SCREEN3/AIRSCREEN to screen, then AERMOD or ADMS if a significant source — versus WHO/national standards (≤25% contribution rule in non-degraded airsheds).</li><li>Confirm the engines meet the <b>emission guideline values</b> (NOx '+IFC_NOX+' mg/Nm³, PM '+IFC_PM+' mg/Nm³ @15% O₂) and SO₂ via ≤1.5% S fuel; add SCR/oxidation catalyst if needed.</li><li>Prepare the <b>ESIA / ESMP</b> with mitigation, stack-height/siting optimisation, monitoring and stakeholder engagement.</li><li><b>Disclose</b> the ESIA (Category A: ≥60 days) and obtain host-country environmental approval before construction.</li><li>Install <b>continuous/periodic emissions monitoring</b> and report against the guideline values during operation.</li></ol>'; nx.setAttribute('data-done','1'); }
+}
+function dieselModel(){var p=DPRE[+document.getElementById('d_model').value]; if(p&&p.kw) document.getElementById('d_kw').value=p.kw; dieselCalc();}
 function dieselCalc(){
-  const kw=parseFloat(document.getElementById('d_kw').value)||0, hp=kw/0.7457;
-  const units=parseFloat(document.getElementById('d_units').value)||1;
-  const hours=parseFloat(document.getElementById('d_duty').value)||8760;
-  const emergency=hours<=200;
-  const ef=DEF[document.getElementById('d_ctrl').value]||DEF.t4;
-  const tpy=g=> g*hp*hours*units/453.592/2000;
-  const rows=[{k:'NOx',t:tpy(ef.NOx),crit:true},{k:'CO',t:tpy(ef.CO),crit:true},{k:'VOC',t:tpy(ef.VOC),crit:true},{k:'PM2.5 / PM10',t:tpy(ef.PM),crit:true},{k:'SO2',t:tpy(ef.SO2),crit:true}];
-  let maxCrit=0,maxNoxVoc=0; rows.forEach(r=>{maxCrit=Math.max(maxCrit,r.t); if(r.k==='NOx'||r.k==='VOC')maxNoxVoc=Math.max(maxNoxVoc,r.t);});
-  const st=document.getElementById('d_loc').value, isAtt=st==='att', naThresh= st==='na_mod'?100:null;
-  let majorNSR,nsrType;
-  if(isAtt){majorNSR=maxCrit>=250;nsrType='PSD';} else {majorNSR=(maxNoxVoc>=naThresh)||(maxCrit>=250);nsrType='Nonattainment NSR';}
-  const tvThresh=isAtt?100:Math.min(100,naThresh);
-  const titleV=maxCrit>=tvThresh||(!isAtt&&maxNoxVoc>=naThresh);
-  const lane=majorNSR?3:titleV?2:(emergency?0:1);
-  dieselRender({rows:rows,maxCrit:maxCrit,majorNSR:majorNSR,titleV:titleV,nsrType:nsrType,lane:lane,emergency:emergency});
+  var kw=parseFloat(document.getElementById('d_kw').value)||0, hp=kw/0.7457;
+  var units=parseFloat(document.getElementById('d_units').value)||1;
+  var hours=parseFloat(document.getElementById('d_duty').value)||8760;
+  var emergency=hours<=200;
+  var cf=hours/8760;
+  var gf=function(id){var el=document.getElementById(id);return el?(parseFloat(el.value)||0):0;};
+  var ef={NOx:gf('df_nox'),CO:gf('df_co'),VOC:gf('df_voc'),PM:gf('df_pm'),SO2:gf('df_so2')};
+  // IFC NOx stack test: O2-correct the certified concentration to 15% O2; plus an EPA Method 19 cross-check from the g/bhp.hr factor.
+  var noxC=gf('df_noxc'), o2ref=gf('df_o2');
+  var c15conc=(noxC>0 && o2ref<20.9)?noxC*(20.9-15)/(20.9-o2ref):0;
+  var FD=9190, HR=7000;   // dscf/MMBtu distillate oil (HHV); Btu/bhp.hr heat rate (tool basis)
+  var c15ef=(ef.NOx>0)?(ef.NOx*1e9/HR)/(FD*20.9/(20.9-15))*35.3147*(293.15/273.15):0;
+  var noxPass=(c15conc>0)&&(c15conc<=IFC_NOX);
+  var tpy=function(g){return g*hp*hours*units/453.592/2000;};
+  var lbhr=function(g){return g*hp/453.592;};
+  var rows=[{k:'NOx',t:tpy(ef.NOx),lbhr:lbhr(ef.NOx),crit:true},{k:'CO',t:tpy(ef.CO),lbhr:lbhr(ef.CO),crit:true},{k:'VOC',t:tpy(ef.VOC),lbhr:lbhr(ef.VOC),crit:true},{k:'PM2.5 / PM10',t:tpy(ef.PM),lbhr:lbhr(ef.PM),crit:true},{k:'SO2',t:tpy(ef.SO2),lbhr:lbhr(ef.SO2),crit:true}];
+  var get=function(k){var r=rows.find(function(x){return x.k===k;});return r?r.t:0;};
+  var noxT=get('NOx'),so2T=get('SO2'),pmT=get('PM2.5 / PM10');
+  var heatU=hp*7000/1e6;               // MMBtu/hr per unit (HHV)
+  var mwth=(heatU*units)/3.412;        // MWth (1 MWth = 3.412 MMBtu/hr)
+  var large=mwth>=50;
+  var egvApplies=(hours>500)&&(cf>0.30);
+  var significant = large || noxT>=500 || so2T>=500 || pmT>=50;
+  var deg=document.getElementById('d_loc').value==='deg';
+  var lane=0;
+  if(!emergency) lane=1;                       // prime/continuous -> at least Category B
+  if(significant) lane=2;                       // significant source -> Category A
+  if(deg && !emergency) lane=Math.max(lane,2);  // degraded airshed + non-trivial source -> Category A
+  if(significant && deg) lane=3;                // significant source in a degraded airshed -> heaviest
+  var R={rows:rows,noxT:noxT,so2T:so2T,pmT:pmT,kw:kw,hp:hp,hours:hours,units:units,cf:cf,heat:heatU,mwth:mwth,large:large,egvApplies:egvApplies,significant:significant,deg:deg,emergency:emergency,lane:lane,noxEF:ef.NOx,noxC:noxC,o2ref:o2ref,c15conc:c15conc,c15ef:c15ef,noxPass:noxPass};
+  dieselRender(R); dieselTech(R);
 }
 function dieselRender(R){
-  const si=(typeof UNIT!=='undefined'&&UNIT==='si'); const conv=v=>si?v*TON:v;
-  const colors=["#1b8a4b","#1b8a4b","#b97b00","#c0392b"];
-  const laneName=["Permit by Rule / general permit (lightest)","State minor-source permit","State permit + Title V operating permit","Federal PSD + Title V (heaviest)"][R.lane];
-  const times=["Days–weeks","1–3 months","6–12 months","12+ months"];
-  const reviews=["Pre-approved","Streamlined (state)","State + BACT","Federal PSD + BACT"];
-  const summ=["Emergency/standby engines run few hours, so emissions stay low — the lightest, fastest authorization (often Permit by Rule).","With this setup it fits a streamlined state minor-source permit.","Needs a state construction permit plus a federal operating permit. Plan several months and strong controls.","Large/continuous diesel engines emit a lot — this triggers the heaviest federal review (PSD). Expect 12+ months."];
+  var si=(typeof UNIT!=='undefined'&&UNIT==='si'); var conv=function(v){return si?v*TON:v;};
+  var colors=["#1b8a4b","#1b8a4b","#b97b00","#c0392b"];
+  var laneName=["Category C — screening + ESMP (lightest)","Category B — limited ESIA + ESMP","Category A — full ESIA + dispersion modelling","Category A — full ESIA + best-available controls / offsets (heaviest)"][R.lane];
+  var times=["Weeks","1–3 months","6–12 months","12+ months"];
+  var reviews=["Cat C (screening)","Cat B (limited ESIA)","Cat A (full ESIA)","Cat A + offsets"];
+  var summ=[
+   "Low-emission or emergency-only engines in a clean area — very limited impact. Just meet the international (IFC) emission limits and keep a simple environmental management plan.",
+   "An engine that runs regularly but with modest emissions in a clean area — limited, local impact. Expect a short environmental study and a management plan, meeting the IFC emission limits.",
+   "The emissions are high enough, or the location sensitive enough, to be a real air-quality concern — a full environmental study with air-quality modelling is needed before approval.",
+   "High emissions in an already-polluted or ecologically sensitive area — a full environmental study plus strong controls (such as SCR) and extra steps to keep the air-quality impact as small as possible."
+  ];
   document.getElementById('d_hero').style.background='linear-gradient(135deg,'+colors[R.lane]+',#2e6ba8)';
   document.getElementById('d_lane').textContent=laneName;
   document.getElementById('d_summary').innerHTML=summ[R.lane];
   document.getElementById('d_time').innerHTML=times[R.lane];
   document.getElementById('d_review').textContent=reviews[R.lane];
-  document.getElementById('d_op').textContent=R.titleV?'Required':'Not required';
+  document.getElementById('d_op').textContent=R.lane>=2?(R.lane===3?'Required (60-day)':'Required'):(R.lane===1?'Limited':'Not required');
   document.getElementById('d_cost').textContent=['$','$$','$$$','$$$$'][R.lane];
-  let m=''; const lvl=R.lane+1; for(let i=1;i<=4;i++){m+='<div class="s-seg" style="background:'+(i<=lvl?colors[R.lane]:'#e3e8ee')+'"></div>';}
+  var m=''; var lvl=R.lane+1; for(var i=1;i<=4;i++){m+='<div class="s-seg" style="background:'+(i<=lvl?colors[R.lane]:'#e3e8ee')+'"></div>';}
   document.getElementById('d_meter').innerHTML=m;
   document.getElementById('d_burden').textContent=["Lightest","Light","Moderate","Heaviest"][R.lane];
-  const needs=[["Likely a Permit by Rule for emergency/standby engines","Keep a non-resettable hour meter (~100 hr/yr cap)","Federal NSPS IIII + NESHAP ZZZZ still apply"],["Register your state's minor-source / general permit","Meet the permit emission limits","Federal NSPS IIII + NESHAP ZZZZ apply"],["State construction permit with BACT + air modeling","Federal Title V operating permit","NSPS IIII (Tier 4) + NESHAP ZZZZ apply"],["Full federal PSD review: BACT, air modeling, public comment","Federal Title V operating permit","NSPS IIII Tier 4 (SCR + particulate filter) + NESHAP ZZZZ","Budget ~12+ months"]][R.lane];
-  document.getElementById('d_needs').innerHTML=needs.map(x=>'<li>'+x+'</li>').join('');
-  const tip=document.getElementById('d_tip');
-  if(R.lane>=3){tip.className='s-tip warn';tip.innerHTML='Running large diesels continuously drives the heaviest permitting. Using them only for backup (emergency duty) keeps emissions — and permitting — far lighter.';}
-  else if(R.emergency){tip.className='s-tip go';tip.innerHTML='Emergency/standby duty keeps you in the lightest lane. Stay within ~100 hr/yr of testing &amp; maintenance to keep it.';}
-  else {tip.className='s-tip go';tip.innerHTML='This sits in a lighter permitting lane.';}
+  var needs=[
+   ["Meet the IFC emission guideline values (Table 1.1.2)","Keep an Environmental & Social Management Plan (ESMP)","Emergency/low-hour engines: guideline values may not formally bind, but apply good practice"],
+   ["Limited ESIA + ESMP","Screening-level air dispersion model (SCREEN3 / AIRSCREEN)","Meet the IFC emission guideline values for engines"],
+   ["Full ESIA with refined dispersion modelling (AERMOD / ADMS)","Demonstrate ≤25% of the ambient air-quality standard (non-degraded)","Stakeholder engagement + public disclosure + monitoring plan"],
+   ["Full ESIA + best-available controls (e.g. SCR) to beat the guideline values","Minimise the air-quality increment to a fraction of the standard","Possible emission offsets + continuous emissions monitoring"]
+  ][R.lane];
+  document.getElementById('d_needs').innerHTML=needs.map(function(x){return '<li>'+x+'</li>';}).join('');
+  var tip=document.getElementById('d_tip');
+  if(R.lane>=3){tip.className='s-tip warn';tip.innerHTML='A significant source in a degraded/sensitive airshed drives the heaviest assessment. Adding SCR, raising stack height, or siting in a cleaner airshed lightens both emissions and the assessment.';}
+  else if(R.emergency){tip.className='s-tip go';tip.innerHTML='Emergency/standby duty (under ~500 hr/yr &amp; 30% load) keeps impacts low and the engine guideline values do not formally bind — the lightest path.';}
+  else if(R.significant){tip.className='s-tip warn';tip.innerHTML='This is a “significant source” under the IFC General EHS Guidelines, so a baseline air-quality study and dispersion modelling are expected.';}
+  else {tip.className='s-tip go';tip.innerHTML='Below the significant-source thresholds in a non-degraded airshed — a lighter, limited assessment.';}
   tip.style.display='block';
-  const eb=document.getElementById('d_emitbody');
+  var eb=document.getElementById('d_emitbody');
   if(document.getElementById('de_unit')) document.getElementById('de_unit').textContent= si?'Per year (tonnes)':'Per year (tons)';
-  const names={'NOx':'NOx (smog-forming)','CO':'CO (carbon monoxide)','VOC':'VOC (smog-forming)','PM2.5 / PM10':'Fine particles (PM2.5)','SO2':'SO2'};
-  eb.innerHTML=R.rows.map(r=>{let b; if(r.t>=250)b='<span class="s-badge bad">Over major-source limit</span>'; else if(r.t>=100)b='<span class="s-badge warn">Needs operating permit</span>'; else b='<span class="s-badge ok">Under all limits</span>'; return '<tr><td>'+(names[r.k]||r.k)+'</td><td>'+conv(r.t).toLocaleString('en-US',{maximumFractionDigits:1})+'</td><td>'+b+'</td></tr>';}).join('');
-  const ch=document.getElementById('d_chart'); if(ch) ch.innerHTML=buildChart(R.rows,si);
-  const prime=!R.emergency;
-  const rules=['<span class="s-rulebadge">NSPS IIII</span> Federal diesel-engine standard. '+(prime?'New <b>prime/continuous</b> engines must meet <b>Tier 4</b> — SCR + a diesel particulate filter.':'<b>Emergency</b> engines are limited to ~100 hr/yr testing/maintenance and are <b>exempt from Tier 4</b>.'),'<span class="s-rulebadge">NESHAP ZZZZ</span> Air-toxics rule for engines (formaldehyde, etc.); often met with an oxidation catalyst or by meeting the NSPS for new engines.','<span class="s-rulebadge">State</span> In '+USSTATE+': '+(R.lane>=3?'major source, so PSD + Title V apply.':(R.emergency?'emergency engines commonly qualify for a Permit by Rule / general permit.':'a state minor-source permit (or case-by-case); Title V if a major source.')),'<span class="s-rulebadge">Fuel</span> Must use ultra-low-sulfur diesel (ULSD, 15 ppm sulfur).'];
-  document.getElementById('d_rules').innerHTML=rules.map(x=>'<li>'+x+'</li>').join('');
-  document.getElementById('d_months').textContent=PMONTHS[R.lane];
-  document.getElementById('d_permitcost').textContent=PCOST[R.lane];
+  var names={'NOx':'NOx (smog-forming)','CO':'CO (carbon monoxide)','VOC':'VOC (smog-forming)','PM2.5 / PM10':'Particulates (PM10)','SO2':'SO₂'};
+  var thr={'NOx':500,'SO2':500,'PM2.5 / PM10':50};
+  eb.innerHTML=R.rows.map(function(r){var b; var t=thr[r.k];
+    if(t&&r.t>=t)b='<span class="s-badge bad">Significant source (≥'+t+' tpy)</span>';
+    else if(t)b='<span class="s-badge ok">Below '+t+'-tpy threshold</span>';
+    else b='<span class="s-badge ok">No IFC tonnage threshold</span>';
+    return '<tr><td>'+(names[r.k]||r.k)+'</td><td>'+conv(r.t).toLocaleString('en-US',{maximumFractionDigits:1})+'</td><td>'+b+'</td></tr>';}).join('');
+  var ch=document.getElementById('d_chart'); if(ch) ch.innerHTML=buildDieselChart(R.rows,si);
+  var rules=[
+   '<span class="s-rulebadge">IFC EHS</span> Engines this size fall under the <b>General EHS Guidelines — Small Combustion (3–50 MWth)</b>. Liquid/compression-ignition engine NOx guideline ≈ <b>'+IFC_NOX+' mg/Nm³</b> (bore &lt;400 mm) and PM ≈ <b>'+IFC_PM+' mg/Nm³</b>, at 15% O₂.'+(R.large?' This plant is <b>≥50 MWth</b>, so the stricter <b>Thermal Power Plant EHS Guidelines</b> apply.':''),
+   '<span class="s-rulebadge">Fuel sulphur</span> SO₂ is controlled by fuel quality — use diesel with <b>≤1.5% sulphur</b> (lower if locally available); ultra-low-sulphur diesel easily meets this.',
+   '<span class="s-rulebadge">Airshed</span> '+(R.deg?'A <b>degraded / ecologically sensitive</b> airshed: more stringent controls and minimising the increment are expected.':'A <b>non-degraded</b> airshed: the project should add ≤25% of the ambient air-quality standard, leaving headroom for future growth.'),
+   '<span class="s-rulebadge">Assessment</span> '+(R.significant?'A <b>significant source</b> — baseline ambient monitoring and atmospheric <b>dispersion modelling</b> (AERMOD/ADMS) against the WHO/national standards are required.':'Below significant-source thresholds — a screening-level assessment is generally sufficient.')
+  ];
+  document.getElementById('d_rules').innerHTML=rules.map(function(x){return '<li>'+x+'</li>';}).join('');
+  document.getElementById('d_months').textContent=["2–6 weeks","1–3 months","6–12 months","12–24 months"][R.lane];
+  document.getElementById('d_permitcost').textContent=["$5k–20k","$20k–75k","$75k–250k","$250k–750k+"][R.lane];
 }
 
 // ===== National: state selector + attainment helper =====
@@ -1106,6 +1386,7 @@ function onStateChange(){const sel=document.getElementById('us_state'); USABBR=s
 syncCtrl();
 if(!loadFromURL() && !loadState()){ applyPreset(); }
 showTab('simple');
+dieselSetFactors();
 dieselModel();
 renderStateHelp();
 renderCompare();
