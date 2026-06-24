@@ -162,7 +162,7 @@
 <body>
 <header style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
   <div>
-    <h1>Gas Turbine Air-Permitting Lane Finder</h1>
+    <h1>Gas Turbine/Reciprocating Engine Air-Permitting Lane Finder</h1>
     <p>Live screening of U.S. federal/state air-permitting paths for stationary combustion turbines, and IFC / World Bank Group EHS pathways for reciprocating (diesel) engines. Planning tool, not a permit determination.</p>
   </div>
   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
@@ -490,6 +490,7 @@
 <div class="simplewrap">
   <div class="s-grid">
     <div>
+    <div id="d_in_ov">
     <div class="s-card">
       <h3>Diesel engine project</h3>
       <div class="s-field"><label>Load project</label><select id="d_project" onchange="loadDieselProject()"><option value="">&mdash; Choose a project &mdash;</option><option value="perseus">Perseus &mdash; 28 &times; KTA50-G3</option><option value="montage">Montage &mdash; 32 &times; KTA50-G21</option></select></div>
@@ -499,6 +500,41 @@
       <div class="s-field"><label>How will it run?</label><select id="d_duty" onchange="dieselCalc()"><option value="100">Emergency / standby (~100 hr/yr)</option><option value="8760" selected>Prime / continuous (8,760 hr/yr)</option></select></div>
       <div class="s-field"><label>Emission controls</label><select id="d_ctrl" onchange="dieselSetFactors();dieselCalc()"><option value="unc" selected>Uncontrolled / lean-burn combustion</option><option value="t4">With SCR + aftertreatment</option></select><div class="hint" style="margin-top:6px">SO&#8322; is set by fuel sulphur; NOx/PM by combustion design and any SCR/filter. The Cummins KTA50 units are non-certified with no aftertreatment &mdash; confirm the emissions data sheet with the distributor.</div></div>
       <div class="s-field"><label>Airshed status</label><select id="d_loc" onchange="dieselCalc()"><option value="nond" selected>Non-degraded (clean) airshed</option><option value="deg">Degraded / ecologically sensitive airshed</option></select></div>
+    </div>
+    </div>
+    <div id="d_in_tech" style="display:none">
+      <div class="card">
+        <h2>1 &middot; Engine</h2>
+        <label>Engine model (Cummins) <span class="hint">(presets carry datasheet kW &amp; fuel use)</span></label>
+        <select id="dx_model" onchange="dxApply('model')"></select>
+        <div class="row2">
+          <div><label>Rated power / unit (kW)</label><input id="dx_kw" type="number" min="1" value="2000" oninput="dxApply()"></div>
+          <div><label>Number of units</label><input id="dx_units" type="number" min="1" value="4" oninput="dxApply()"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>2 &middot; Operation</h2>
+        <label>How will it run? <span class="hint">(prime/continuous uses 8,760 hr unless capped)</span></label>
+        <select id="dx_duty" onchange="dxApply()"><option value="100">Emergency / standby (~100 hr/yr)</option><option value="8760" selected>Prime / continuous (8,760 hr/yr)</option></select>
+        <label>Airshed status</label>
+        <select id="dx_loc" onchange="dxApply()"><option value="nond" selected>Non-degraded (clean) airshed</option><option value="deg">Degraded / ecologically sensitive airshed</option></select>
+      </div>
+      <div class="card">
+        <h2>3 &middot; Emission controls</h2>
+        <label>Emission controls</label>
+        <select id="dx_ctrl" onchange="dxApply('ctrl')"><option value="unc" selected>Uncontrolled / lean-burn combustion</option><option value="t4">With SCR + aftertreatment</option></select>
+        <p class="hint" style="margin:6px 0 2px">SO&#8322; is set by fuel sulphur; NOx/PM by combustion design and any SCR/filter. The Cummins KTA50 units are non-certified with no aftertreatment &mdash; confirm the emissions data sheet with the distributor.</p>
+        <details class="adv" style="margin-top:10px"><summary>Advanced emission factors (g/hp-hr)</summary>
+          <p class="hint" style="margin:6px 0 4px">Defaults: <b>Cummins KTA50-G3 Exhaust Emissions Data Sheet</b> &mdash; prime power, 1500&nbsp;rpm / 50&nbsp;Hz (CPL&nbsp;2227). SO&#8322; shown for ULSD (&le;15&nbsp;ppm S); scale with the actual fuel sulphur. Used to estimate annual tonnage (tpy) for the significant-source test &mdash; switch the control selector to &ldquo;With SCR/aftertreatment&rdquo; for controlled rates, or enter your unit&rsquo;s exact figures.</p>
+          <div class="row2"><div><label>NOx</label><input id="df_nox" type="number" step="0.01" value="11" oninput="dieselCalc()"></div><div><label>CO</label><input id="df_co" type="number" step="0.01" value="2.70" oninput="dieselCalc()"></div></div>
+          <div class="row2"><div><label>VOC</label><input id="df_voc" type="number" step="0.01" value="0.12" oninput="dieselCalc()"></div><div><label>PM2.5</label><input id="df_pm" type="number" step="0.01" value="0.09" oninput="dieselCalc()"></div></div>
+          <p class="hint" style="margin:12px 0 4px;border-top:1px solid #e3e8ee;padding-top:10px"><b>NOx stack concentration &mdash; for the IFC limit test.</b> The NOx EGV is a concentration at 15% O&#8322;, so enter the engine&rsquo;s certified NOx concentration and the O&#8322; it&rsquo;s referenced to; the tool corrects it to 15% O&#8322; and judges pass/fail dynamically. KTA50-G3 data sheet: <b>5,500&nbsp;mg/m&#179; @5% O&#8322;</b>.</p>
+          <div class="row2"><div><label>NOx conc. <span class="hint">mg/m&#179;</span></label><input id="df_noxc" type="number" step="1" value="5500" oninput="dieselCalc()"></div><div><label>referenced at <span class="hint">% O&#8322;</span></label><input id="df_o2" type="number" step="0.1" value="5" oninput="dieselCalc()"></div></div>
+          <p class="hint" style="margin:12px 0 4px;border-top:1px solid #e3e8ee;padding-top:10px"><b>Fuel &amp; heat input.</b> Heat input &mdash; which sets MWth and the 50&nbsp;MWth significant-source trigger &mdash; is computed from fuel consumption, not a fixed heat rate. SO&#8322; is computed from fuel sulphur (all fuel sulphur &rarr; SO&#8322;), and checked against the IFC &le;1.5% S limit. BSFC defaults to the data sheet for the selected model/frequency.</p>
+          <div class="row2"><div><label>Fuel use (BSFC) <span class="hint">g/kWh</span></label><input id="df_bsfc" type="number" step="1" value="202" oninput="dieselCalc()"></div><div><label>Fuel HHV <span class="hint">Btu/lb</span></label><input id="df_hhv" type="number" step="100" value="19600" oninput="dieselCalc()"></div></div>
+          <div class="row2"><div><label>Fuel sulphur <span class="hint">% mass</span></label><input id="df_sulf" type="number" step="0.0001" value="0.0015" oninput="dieselCalc()"></div><div></div></div>
+        </details>
+      </div>
     </div>
     </div>
     <div>
@@ -552,6 +588,8 @@
       <div class="s-card" style="margin-top:18px">
         <h3>Is anything over the IFC limit?</h3>
         <div id="d_chart"></div>
+        <div id="d_mwchart" style="margin-top:10px;border-top:1px solid #eef2f7;padding-top:8px"></div>
+        <p class="foot" style="margin-top:8px">Two independent triggers: a pollutant crossing its tonnage line (top), <b>or</b> total plant heat input &ge;50&nbsp;MWth (bottom) &mdash; either one alone makes the plant a significant source.</p>
       </div>
       <div class="s-card" style="margin-top:18px">
         <h3>Estimated yearly emissions</h3>
@@ -563,19 +601,12 @@
       <div class="s-card">
         <h3>Engine snapshot</h3>
         <div class="kv"><span>Rated power / unit</span><span id="dt_kw">&mdash;</span></div>
+        <div class="kv"><span>Speed / frequency</span><span id="dt_speed">&mdash;</span></div>
         <div class="kv"><span>Power / unit (bhp)</span><span id="dt_hp">&mdash;</span></div>
         <div class="kv"><span>Heat input / unit (HHV)</span><span id="dt_heat">&mdash;</span></div>
         <div class="kv"><span>Total plant heat input</span><span id="dt_theat">&mdash;</span></div>
         <div class="kv"><span>Capacity factor (from hours)</span><span id="dt_cf">&mdash;</span></div>
         <div class="kv" style="border:none"><span>IFC facility class</span><span id="dt_size">&mdash;</span></div>
-        <details class="adv" style="margin-top:10px"><summary>Advanced emission factors (g/hp-hr)</summary>
-          <p class="hint" style="margin:6px 0 4px">Defaults: <b>Cummins KTA50-G3 Exhaust Emissions Data Sheet</b> &mdash; prime power, 1500&nbsp;rpm / 50&nbsp;Hz (CPL&nbsp;2227). SO&#8322; shown for ULSD (&le;15&nbsp;ppm S); scale with the actual fuel sulphur. Used to estimate annual tonnage (tpy) for the significant-source test &mdash; switch the control selector to &ldquo;With SCR/aftertreatment&rdquo; for controlled rates, or enter your unit&rsquo;s exact figures.</p>
-          <div class="row2"><div><label>NOx</label><input id="df_nox" type="number" step="0.01" value="11" oninput="dieselCalc()"></div><div><label>CO</label><input id="df_co" type="number" step="0.01" value="2.70" oninput="dieselCalc()"></div></div>
-          <div class="row2"><div><label>VOC</label><input id="df_voc" type="number" step="0.01" value="0.12" oninput="dieselCalc()"></div><div><label>PM2.5</label><input id="df_pm" type="number" step="0.01" value="0.09" oninput="dieselCalc()"></div></div>
-          <div class="row2"><div><label>SO2 <span class="hint">(≤1.5% S)</span></label><input id="df_so2" type="number" step="0.001" value="0.005" oninput="dieselCalc()"></div><div></div></div>
-          <p class="hint" style="margin:12px 0 4px;border-top:1px solid #e3e8ee;padding-top:10px"><b>NOx stack concentration &mdash; for the IFC limit test.</b> The NOx EGV is a concentration at 15% O&#8322;, so enter the engine&rsquo;s certified NOx concentration and the O&#8322; it&rsquo;s referenced to; the tool corrects it to 15% O&#8322; and judges pass/fail dynamically. KTA50-G3 data sheet: <b>5,500&nbsp;mg/m&#179; @5% O&#8322;</b>.</p>
-          <div class="row2"><div><label>NOx conc. <span class="hint">mg/m&#179;</span></label><input id="df_noxc" type="number" step="1" value="5500" oninput="dieselCalc()"></div><div><label>referenced at <span class="hint">% O&#8322;</span></label><input id="df_o2" type="number" step="0.1" value="5" oninput="dieselCalc()"></div></div>
-        </details>
       </div>
       <details class="s-card" id="d_snapcard" style="margin-top:18px"><summary style="cursor:pointer;font-weight:700;color:var(--navy)">How these numbers are calculated</summary><div id="d_snapmath" style="margin-top:10px"></div></details>
       <div class="s-card" style="margin-top:18px"><h3>Regulatory determinations</h3><div id="dt_verdicts"></div></div>
@@ -1152,8 +1183,8 @@ function setEquip(name){
   document.getElementById('eq-diesel').classList.toggle('active',name==='diesel');
   if(name==='diesel') dieselCalc();
 }
-const DPRE=[{n:"KTA50-G3 (prime, 60 Hz) — 1,300 kW",kw:1300},{n:"KTA50-G21 (prime, 50 Hz) — 1,567 kW",kw:1567},{n:"QSK60 — 2,000 kW",kw:2000},{n:"QSK95 — 3,000 kW",kw:3000},{n:"Custom (enter kW)",kw:null}];
-const DPROJ={perseus:{model:0,units:28},montage:{model:1,units:32}};
+const DPRE=[{n:"KTA50-G3 - 1,097 kWm (50 Hz, 1500 rpm)",kw:1097,bsfc:202,rpm:1500,freq:"50"},{n:"KTA50-G3 - 1,220 kWm (60 Hz, 1800 rpm)",kw:1220,bsfc:203,rpm:1800,freq:"60"},{n:"KTA50-G21 - 1,567 kWm (50 Hz, 1500 rpm)",kw:1567,bsfc:206,rpm:1500,freq:"50"},{n:"QSK60 - 2,000 kW (50 Hz)",kw:2000,bsfc:205,rpm:1500,freq:"50"},{n:"QSK95 - 3,000 kW (50 Hz)",kw:3000,bsfc:205,rpm:1500,freq:"50"},{n:"Custom (enter kW)",kw:null}];
+const DPROJ={perseus:{model:0,units:28},montage:{model:2,units:32}};
 function stackCalc(){
   var bh=parseFloat((document.getElementById('d_bh')||{}).value)||0;
   var bw=parseFloat((document.getElementById('d_bw')||{}).value)||0;
@@ -1172,15 +1203,30 @@ function loadDieselProject(){
   dieselTab('ov');
   try{window.scrollTo({top:0,behavior:'smooth'});}catch(e){}
 }
-(function(){const m=document.getElementById('d_model'); if(m) DPRE.forEach((p,i)=>{const o=document.createElement('option');o.value=i;o.textContent=p.n; if(i===1)o.selected=true; m.appendChild(o);});})();
+(function(){['d_model','dx_model'].forEach(function(id){var m=document.getElementById(id); if(m) DPRE.forEach((p,i)=>{const o=document.createElement('option');o.value=i;o.textContent=p.n; if(i===0)o.selected=true; m.appendChild(o);});});})();
 const DEF={unc:{NOx:11.0,CO:2.70,VOC:0.12,PM:0.09,SO2:0.005,NOxC:5500,O2:5},t4:{NOx:0.5,CO:0.25,VOC:0.07,PM:0.02,SO2:0.005,NOxC:250,O2:5}};
-function dieselTab(name){
-  document.getElementById('d-ov').style.display = name==='tech'?'none':'block';
-  document.getElementById('d-tech').style.display = name==='tech'?'block':'none';
-  document.getElementById('dsub-ov').classList.toggle('active',name!=='tech');
-  document.getElementById('dsub-tech').classList.toggle('active',name==='tech');
+var DPAIRS=[['d_model','dx_model'],['d_kw','dx_kw'],['d_units','dx_units'],['d_duty','dx_duty'],['d_ctrl','dx_ctrl'],['d_loc','dx_loc']];
+function dCopy(from,to){DPAIRS.forEach(function(pr){var a=document.getElementById(pr[from]),b=document.getElementById(pr[to]);if(a&&b)b.value=a.value;});}
+function dxApply(kind){
+  dCopy(1,0);                       // technical inputs -> canonical (d_) inputs
+  if(kind==='model'){ dieselModel(); }
+  else if(kind==='ctrl'){ dieselSetFactors(); dieselCalc(); }
+  else { dieselCalc(); }
+  dCopy(0,1);                       // reflect any computed changes back to technical
 }
-function dieselSetFactors(){var e=DEF[document.getElementById('d_ctrl').value]||DEF.t4; var m={df_nox:e.NOx,df_co:e.CO,df_voc:e.VOC,df_pm:e.PM,df_so2:e.SO2,df_noxc:e.NOxC,df_o2:e.O2}; for(var k in m){var el=document.getElementById(k); if(el) el.value=m[k];}}
+function dieselTab(name){
+  var tech=name==='tech';
+  document.getElementById('d-ov').style.display = tech?'none':'block';
+  document.getElementById('d-tech').style.display = tech?'block':'none';
+  var io=document.getElementById('d_in_ov'), it=document.getElementById('d_in_tech');
+  if(io) io.style.display=tech?'none':'block';
+  if(it) it.style.display=tech?'block':'none';
+  if(tech) dCopy(0,1); else dCopy(1,0);
+  document.getElementById('dsub-ov').classList.toggle('active',!tech);
+  document.getElementById('dsub-tech').classList.toggle('active',tech);
+  dieselCalc();
+}
+function dieselSetFactors(){var e=DEF[document.getElementById('d_ctrl').value]||DEF.t4; var m={df_nox:e.NOx,df_co:e.CO,df_voc:e.VOC,df_pm:e.PM,df_noxc:e.NOxC,df_o2:e.O2}; for(var k in m){var el=document.getElementById(k); if(el) el.value=m[k];}}
 var IFC_NOX=1460, IFC_PM=50; // mg/Nm3 @15% O2 - liquid CI engine, bore <400mm
 function buildDieselChart(rows,si){
   var items=[{k:'NOx',name:'NOx',thr:500},{k:'SO2',name:'SO\u2082',thr:500},{k:'PM2.5 / PM10',name:'PM10',thr:50}];
@@ -1218,6 +1264,34 @@ function buildDieselChart(rows,si){
   g+='<text x="8" y="'+fy+'" fill="#8a99a8" font-size="10">Limits: NOx &amp; SO\u2082 '+l500.toLocaleString()+' '+UW+', PM10 '+l50.toLocaleString()+' '+UW+'. CO and VOC have no IFC tonnage limit.</text>';
   g+='</svg>'; return g;
 }
+function buildMwChart(R){
+  var mw=R.mwth, thr=50, half=25;
+  var mwe=(R.kw*R.units)/1000;
+  var over=mw>=thr;
+  var col=over?'#c0392b':(mw>=half?'#e0a200':'#1b8a4b');
+  var L=86, RXbar=512, statusX=596;
+  var plotW=RXbar-L;
+  var xLimit=L+0.52*plotW;                 // 50 MWth marker position (matches the tonnage chart scale visually)
+  var capR=(RXbar-L)/(xLimit-L);
+  var ratio=mw/thr;
+  var top=58, barH=18, h=top+56;
+  var g='<svg viewBox="0 0 600 '+h+'" width="100%" font-family="Segoe UI,Arial" font-size="12">';
+  g+='<text x="8" y="18" fill="#1f3a56" font-weight="700" font-size="13">How big is the plant? (heat input)</text>';
+  g+='<text x="8" y="34" fill="#8a99a8" font-size="10.5">A plant ≥50 MWth is a significant source on size alone — regardless of tonnage.</text>';
+  g+='<line x1="'+xLimit+'" y1="'+(top-8)+'" x2="'+xLimit+'" y2="'+(top+barH+6)+'" stroke="#c0392b" stroke-width="1.6" stroke-dasharray="5 3"/>';
+  g+='<text x="'+xLimit+'" y="'+(top-12)+'" fill="#c0392b" font-size="10" text-anchor="middle" font-weight="700">50 MWth</text>';
+  var drawR=Math.min(ratio,capR);
+  var be=L+drawR*(xLimit-L);
+  var bx=Math.max(2,be-L);
+  g+='<rect x="'+L+'" y="'+(top+2)+'" width="'+plotW+'" height="'+barH+'" rx="4" fill="#eef2f7"/>';
+  g+='<rect x="'+L+'" y="'+(top+2)+'" width="'+bx+'" height="'+barH+'" rx="4" fill="'+col+'"/>';
+  if(ratio>capR) g+='<text x="'+(RXbar-5)+'" y="'+(top+15)+'" fill="#fff" font-size="11" text-anchor="end" font-weight="700">▶</text>';
+  g+='<text x="8" y="'+(top+16)+'" fill="#1f3a56" font-weight="700" font-size="12.5">Plant size</text>';
+  g+='<text x="8" y="'+(top+30)+'" fill="#6b7886" font-size="10">'+mw.toFixed(1)+' MWth (≈'+mwe.toFixed(1)+' MWe · '+R.units+' unit'+(R.units==1?'':'s')+')</text>';
+  g+='<text x="'+statusX+'" y="'+(top+16)+'" fill="'+col+'" font-size="11.5" text-anchor="end" font-weight="700">'+(over?'SIGNIFICANT':'OK')+'</text>';
+  g+='<text x="8" y="'+(top+50)+'" fill="#8a99a8" font-size="10">Threshold: 50 MWth total plant heat input. ≥50 MWth also moves the plant to the stricter Thermal Power EHS Guidelines.</text>';
+  g+='</svg>'; return g;
+}
 function dieselTech(R){
   if(!document.getElementById('dt_kw')) return;
   var si=(typeof UNIT!=='undefined'&&UNIT==='si');
@@ -1227,6 +1301,7 @@ function dieselTech(R){
   document.getElementById('dt_theat').textContent= si ? R.mwth.toFixed(1)+' MW(th)' : (R.heat*R.units).toFixed(1)+' MMBtu/hr ('+R.mwth.toFixed(1)+' MWth)';
   document.getElementById('dt_cf').textContent=(R.cf*100).toFixed(1)+'% ('+R.hours.toLocaleString()+' hr)';
   document.getElementById('dt_size').textContent = R.large ? '≥50 MWth — Thermal Power EHS Guidelines' : '3–50 MWth — Small Combustion (Table 1.1.2)';
+  var sp=document.getElementById('dt_speed'); if(sp) sp.textContent=R.rpm+' rpm · '+R.freq+' Hz';
   var sn=document.getElementById('d_stacknote');
   if(sn) sn.innerHTML = R.large
    ? 'This plant is <b>≥50 MWth</b>, so the <b>Thermal Power Plant EHS Guidelines</b> apply: indicative GIIP stack height up to <b>~80 m</b> for diesel-engine power plants (≈100 m for gas combined-cycle, ≈200 m for large coal). Use the larger of that and the GEP minimum, confirmed by modelling.'
@@ -1235,7 +1310,9 @@ function dieselTech(R){
   var sm=document.getElementById('d_snapmath');
   if(sm){ sm.innerHTML=
    '<div class="kv"><span>Power → bhp</span><span>'+Math.round(R.kw).toLocaleString()+' kW ÷ 0.7457 = '+Math.round(R.hp).toLocaleString()+' bhp</span></div>'+
-   '<div class="kv"><span>Heat input / unit</span><span>'+Math.round(R.hp).toLocaleString()+' bhp × 7,000 Btu/bhp·hr = '+R.heat.toFixed(1)+' MMBtu/hr</span></div>'+
+   '<div class="kv"><span>Fuel use / unit</span><span>'+R.bsfc+' g/kWh × '+Math.round(R.kw).toLocaleString()+' kW = '+R.fuelKgHr.toFixed(0)+' kg/hr</span></div>'+
+   '<div class="kv"><span>Heat input / unit (HHV)</span><span>'+R.fuelKgHr.toFixed(0)+' kg/hr × '+R.hhv.toLocaleString()+' Btu/lb = '+R.heat.toFixed(1)+' MMBtu/hr ('+Math.round(R.heat*1e6/R.hp).toLocaleString()+' Btu/bhp·hr)</span></div>'+
+   '<div class="kv"><span>SO₂ from fuel sulphur</span><span>'+R.sulf+'% S → '+R.so2gHr.toFixed(0)+' g/hr → '+R.so2EF.toFixed(4)+' g/hp·hr</span></div>'+
    '<div class="kv"><span>Plant heat input</span><span>'+R.heat.toFixed(1)+' × '+R.units+' units = '+(R.heat*R.units).toFixed(1)+' MMBtu/hr</span></div>'+
    '<div class="kv"><span>→ MWth (÷ 3.412)</span><span>'+R.mwth.toFixed(1)+' MWth → '+(R.large?'≥50: Thermal Power':'3–50: Small Combustion')+'</span></div>'+
    '<div class="kv"><span>Annual tonnage (tpy)</span><span>g/bhp·hr × bhp × '+R.hours.toLocaleString()+' hr × '+R.units+' ÷ 453.592 ÷ 2,000</span></div>'+
@@ -1257,6 +1334,7 @@ function dieselTech(R){
     noxBody='Enter the engine’s certified NOx concentration and its reference O₂ in <b>Advanced emission factors</b> to test it against the <b>'+IFC_NOX+' mg/Nm³ @15% O₂</b> guideline. '+applyNote;
   }
   add(noxClass,'NOx stack limit: '+(R.c15conc<=0?'enter concentration':(R.noxPass?'meets EGV ✓':'over EGV ✗')), noxBody);
+  add(R.sulfOK?'v-ok':'v-bad','Fuel sulphur: '+(R.sulfOK?'within IFC limit ✓':'over 1.5% limit ✗'),'IFC controls SO₂ through fuel quality — diesel ≤<b>1.5% S</b> (up to 3.0% only if justified). Selected fuel <b>'+R.sulf+'% S</b> → plant-wide SO₂ ≈ <b>'+(si?(R.so2T*TON).toFixed(1)+' t/yr':R.so2T.toFixed(1)+' tpy')+'</b> ('+R.so2EF.toFixed(4)+' g/hp·hr). '+(R.sulfOK?'ULSD (≤15 ppm = 0.0015% S) minimises SO₂ and SCR-driven sulphate mist.':'Exceeds the 1.5% guideline — specify a lower-sulphur fuel.'));
   add(R.significant?'v-bad':'v-ok','Significant source: '+(R.significant?'YES':'no'), R.significant?('Net increase reaches an IFC significant-source trigger (NOx/SO₂ ≥500 tpy, PM10 ≥50 tpy, or ≥50 MWth) → baseline ambient monitoring + atmospheric <b>dispersion modelling</b> (SCREEN3 then AERMOD/ADMS) demonstrating compliance with WHO/national ambient standards.'):('All pollutants stay below the significant-source triggers (NOx/SO₂ 500 tpy, PM10 50 tpy) and the plant is &lt;50 MWth → a screening-level assessment generally suffices.'));
   add(R.deg?'v-bad':'v-ok','Airshed: '+(R.deg?'degraded / sensitive':'non-degraded'), R.deg?('In a degraded or ecologically sensitive airshed, more stringent controls are expected and any increment must be minimised to a small fraction of the ambient standard.'):('In a non-degraded airshed the project should contribute ≤<b>25%</b> of the applicable ambient air-quality standard, preserving capacity for future development.'));
   add('v-warn','Project category: '+["C","B","A","A"][R.lane], 'Mapped to IFC environmental categorisation — '+["Category C: minimal or no adverse impacts; screening + ESMP.","Category B: limited, site-specific, largely reversible impacts; limited ESIA + ESMP.","Category A: potentially significant adverse impacts; full ESIA, refined modelling, stakeholder engagement & disclosure.","Category A in a sensitive setting: full ESIA plus best-available controls/offsets and continuous monitoring."][R.lane]);
@@ -1281,7 +1359,12 @@ function dieselTech(R){
   var nx=document.getElementById('dt_next');
   if(nx && !nx.getAttribute('data-done')){ nx.innerHTML='<ol class="steps"><li><b>Screen &amp; categorise</b> the project (A / B / C) against the IFC Performance Standards and host-country requirements.</li><li>Establish <b>baseline ambient air quality</b> (NO₂, SO₂, PM10/PM2.5) for the airshed and judge degraded vs non-degraded.</li><li>Run <b>atmospheric dispersion modelling</b> — SCREEN3/AIRSCREEN to screen, then AERMOD or ADMS if a significant source — versus WHO/national standards (≤25% contribution rule in non-degraded airsheds).</li><li>Confirm the engines meet the <b>emission guideline values</b> (NOx '+IFC_NOX+' mg/Nm³, PM '+IFC_PM+' mg/Nm³ @15% O₂) and SO₂ via ≤1.5% S fuel; add SCR/oxidation catalyst if needed.</li><li>Prepare the <b>ESIA / ESMP</b> with mitigation, stack-height/siting optimisation, monitoring and stakeholder engagement.</li><li><b>Disclose</b> the ESIA (Category A: ≥60 days) and obtain host-country environmental approval before construction.</li><li>Install <b>continuous/periodic emissions monitoring</b> and report against the guideline values during operation.</li></ol>'; nx.setAttribute('data-done','1'); }
 }
-function dieselModel(){var p=DPRE[+document.getElementById('d_model').value]; if(p&&p.kw) document.getElementById('d_kw').value=p.kw; dieselCalc();}
+function dieselModel(){
+  var p=DPRE[+document.getElementById('d_model').value]||{};
+  if(p.kw!=null) document.getElementById('d_kw').value=p.kw;
+  if(p.bsfc!=null){var be=document.getElementById('df_bsfc'); if(be) be.value=p.bsfc;}
+  dieselCalc();
+}
 function dieselCalc(){
   var kw=parseFloat(document.getElementById('d_kw').value)||0, hp=kw/0.7457;
   var units=parseFloat(document.getElementById('d_units').value)||1;
@@ -1290,18 +1373,32 @@ function dieselCalc(){
   var cf=hours/8760;
   var gf=function(id){var el=document.getElementById(id);return el?(parseFloat(el.value)||0):0;};
   var ef={NOx:gf('df_nox'),CO:gf('df_co'),VOC:gf('df_voc'),PM:gf('df_pm'),SO2:gf('df_so2')};
+  // Engine speed / output frequency (from the selected model)
+  var mp=DPRE[+(document.getElementById('d_model')||{}).value]||{};
+  var freq=mp.freq||'50';
+  var rpm=mp.rpm||(freq==='60'?1800:1500);
+  // Fuel-based heat input + SO2 from fuel sulphur
+  var bsfc=gf('df_bsfc');                 // g/kWh (mechanical)
+  var hhv=gf('df_hhv');                   // Btu/lb (HHV)
+  var sulf=gf('df_sulf');                 // % sulphur by mass
+  var fuelKgHr=(bsfc>0)?bsfc/1000*kw:0;   // kg/hr per unit
+  var hrAct=(fuelKgHr>0 && hhv>0)?fuelKgHr*hhv*2.20462/hp:7000;   // Btu/bhp.hr (HHV), from fuel use; fallback 7,000
+  var so2gHr=fuelKgHr*1000*(sulf/100)*2*0.98;   // g/hr SO2 (all fuel S -> SO2, ~98%)
+  var so2EF=(hp>0)?so2gHr/hp:0;           // g/hp.hr so the existing tpy()/lbhr() helpers apply
+  ef.SO2=so2EF;
+  var sulfOK=sulf<=1.5;
   // IFC NOx stack test: O2-correct the certified concentration to 15% O2; plus an EPA Method 19 cross-check from the g/bhp.hr factor.
   var noxC=gf('df_noxc'), o2ref=gf('df_o2');
   var c15conc=(noxC>0 && o2ref<20.9)?noxC*(20.9-15)/(20.9-o2ref):0;
-  var FD=9190, HR=7000;   // dscf/MMBtu distillate oil (HHV); Btu/bhp.hr heat rate (tool basis)
-  var c15ef=(ef.NOx>0)?(ef.NOx*1e9/HR)/(FD*20.9/(20.9-15))*35.3147*(293.15/273.15):0;
+  var FD=9190;            // dscf/MMBtu distillate oil (HHV); heat rate hrAct derived from fuel use
+  var c15ef=(ef.NOx>0)?(ef.NOx*1e9/hrAct)/(FD*20.9/(20.9-15))*35.3147*(293.15/273.15):0;
   var noxPass=(c15conc>0)&&(c15conc<=IFC_NOX);
   var tpy=function(g){return g*hp*hours*units/453.592/2000;};
   var lbhr=function(g){return g*hp/453.592;};
   var rows=[{k:'NOx',t:tpy(ef.NOx),lbhr:lbhr(ef.NOx),crit:true},{k:'CO',t:tpy(ef.CO),lbhr:lbhr(ef.CO),crit:true},{k:'VOC',t:tpy(ef.VOC),lbhr:lbhr(ef.VOC),crit:true},{k:'PM2.5 / PM10',t:tpy(ef.PM),lbhr:lbhr(ef.PM),crit:true},{k:'SO2',t:tpy(ef.SO2),lbhr:lbhr(ef.SO2),crit:true}];
   var get=function(k){var r=rows.find(function(x){return x.k===k;});return r?r.t:0;};
   var noxT=get('NOx'),so2T=get('SO2'),pmT=get('PM2.5 / PM10');
-  var heatU=hp*7000/1e6;               // MMBtu/hr per unit (HHV)
+  var heatU=hp*hrAct/1e6;              // MMBtu/hr per unit (HHV), from fuel consumption
   var mwth=(heatU*units)/3.412;        // MWth (1 MWth = 3.412 MMBtu/hr)
   var large=mwth>=50;
   var egvApplies=(hours>500)&&(cf>0.30);
@@ -1312,7 +1409,7 @@ function dieselCalc(){
   if(significant) lane=2;                       // significant source -> Category A
   if(deg && !emergency) lane=Math.max(lane,2);  // degraded airshed + non-trivial source -> Category A
   if(significant && deg) lane=3;                // significant source in a degraded airshed -> heaviest
-  var R={rows:rows,noxT:noxT,so2T:so2T,pmT:pmT,kw:kw,hp:hp,hours:hours,units:units,cf:cf,heat:heatU,mwth:mwth,large:large,egvApplies:egvApplies,significant:significant,deg:deg,emergency:emergency,lane:lane,noxEF:ef.NOx,noxC:noxC,o2ref:o2ref,c15conc:c15conc,c15ef:c15ef,noxPass:noxPass};
+  var R={rows:rows,noxT:noxT,so2T:so2T,pmT:pmT,kw:kw,hp:hp,hours:hours,units:units,cf:cf,heat:heatU,mwth:mwth,large:large,egvApplies:egvApplies,significant:significant,deg:deg,emergency:emergency,lane:lane,noxEF:ef.NOx,noxC:noxC,o2ref:o2ref,c15conc:c15conc,c15ef:c15ef,noxPass:noxPass,freq:freq,rpm:rpm,bsfc:bsfc,hhv:hhv,sulf:sulf,fuelKgHr:fuelKgHr,so2gHr:so2gHr,so2EF:so2EF,sulfOK:sulfOK};
   dieselRender(R); dieselTech(R);
 }
 function dieselRender(R){
@@ -1360,6 +1457,7 @@ function dieselRender(R){
     else b='<span class="s-badge ok">No IFC tonnage threshold</span>';
     return '<tr><td>'+(names[r.k]||r.k)+'</td><td>'+conv(r.t).toLocaleString('en-US',{maximumFractionDigits:1})+'</td><td>'+b+'</td></tr>';}).join('');
   var ch=document.getElementById('d_chart'); if(ch) ch.innerHTML=buildDieselChart(R.rows,si);
+  var mc=document.getElementById('d_mwchart'); if(mc) mc.innerHTML=buildMwChart(R);
   var rules=[
    '<span class="s-rulebadge">IFC EHS</span> Engines this size fall under the <b>General EHS Guidelines — Small Combustion (3–50 MWth)</b>. Liquid/compression-ignition engine NOx guideline ≈ <b>'+IFC_NOX+' mg/Nm³</b> (bore &lt;400 mm) and PM ≈ <b>'+IFC_PM+' mg/Nm³</b>, at 15% O₂.'+(R.large?' This plant is <b>≥50 MWth</b>, so the stricter <b>Thermal Power Plant EHS Guidelines</b> apply.':''),
    '<span class="s-rulebadge">Fuel sulphur</span> SO₂ is controlled by fuel quality — use diesel with <b>≤1.5% sulphur</b> (lower if locally available); ultra-low-sulphur diesel easily meets this.',
