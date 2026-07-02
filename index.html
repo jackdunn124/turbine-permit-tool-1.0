@@ -856,12 +856,21 @@ function calc(){
     var pkw=mw*units*1000;
     var rs=parseFloat(($('tc_scr')||{}).value)||320, rc=parseFloat(($('tc_cat')||{}).value)||15, om=(parseFloat(($('tc_om')||{}).value)||5)/100;
     var pMW=pkw/1000;
-    var capBase=pkw*rs+pkw*rc, capLo=capBase*0.65, capHi=capBase*1.30, omLo=capLo*om, omHi=capHi*om;
-    var perRange='$'+Math.round(capLo/pMW/1e4)*10+'k\u2013$'+Math.round(capHi/pMW/1e4)*10+'k/MW';
-    var capRange=_roughM(capLo)+'\u2013'+_roughM(capHi), omRange=_roughM(omLo)+'\u2013'+_roughM(omHi);
-    var spm=document.getElementById('s_ctrlperMW'); if(spm) spm.textContent=perRange;
+    var scrAct=noxppm<=6, catAct=coppm<=4;
+    var capBase=(scrAct?pkw*rs:0)+(catAct?pkw*rc:0);
+    var spm=document.getElementById('s_ctrlperMW');
     var el=document.getElementById('t_ctrlcost');
-    if(el) el.innerHTML='<div style="font-size:15px;line-height:1.55"><b>Emission control system</b> \u2014 SCR + CO oxidation catalyst (low\u2013high):<br><span style="font-size:20px;font-weight:800;color:var(--navy)">'+perRange+'</span><br>'+capRange+' installed &nbsp;+&nbsp; '+omRange+'/yr to operate</div>'
+    if(capBase<=0){
+      if(spm) spm.textContent='$0';
+      if(el) el.innerHTML='<div style="font-size:15px;line-height:1.55"><b>No post-combustion controls selected</b> \u2014 DLN combustion only, so add-on control cost is <b>$0</b>. Choose SCR (NOx) or an oxidation catalyst (CO) to estimate cost.</div>';
+    } else {
+      var capLo=capBase*0.65, capHi=capBase*1.30, omLo=capLo*om, omHi=capHi*om;
+      var perRange='$'+Math.round(capLo/pMW/1e4)*10+'k\u2013$'+Math.round(capHi/pMW/1e4)*10+'k/MW';
+      var capRange=_roughM(capLo)+'\u2013'+_roughM(capHi), omRange=_roughM(omLo)+'\u2013'+_roughM(omHi);
+      var which=[]; if(scrAct)which.push('SCR (NOx)'); if(catAct)which.push('oxidation catalyst (CO)');
+      if(spm) spm.textContent=perRange;
+      if(el) el.innerHTML='<div style="font-size:15px;line-height:1.55"><b>Emission control system</b> \u2014 '+which.join(' + ')+' (low\u2013high):<br><span style="font-size:20px;font-weight:800;color:var(--navy)">'+perRange+'</span><br>'+capRange+' installed &nbsp;+&nbsp; '+omRange+'/yr to operate</div>';
+    }
   })();
 
   // thresholds
