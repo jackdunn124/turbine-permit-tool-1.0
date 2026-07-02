@@ -1198,8 +1198,9 @@ function loadDieselProject(){
   document.getElementById('d_units').value=p.units;
   document.getElementById('d_duty').value='8760';   // prime / continuous generation
   document.getElementById('d_ctrl').value='unc';     // Cummins units non-certified, no aftertreatment
-  dieselSetFactors();
-  dieselModel();                                     // sets kW from the model + recalculates
+  dieselSetFactors();                                // emission factors from control choice
+  dieselModel();                                     // sets kW + BSFC from the model, recalculates
+  dCopy(0,1);                                         // push loaded values into the technical inputs BEFORE the tab switch
   dieselTab('ov');
   try{window.scrollTo({top:0,behavior:'smooth'});}catch(e){}
 }
