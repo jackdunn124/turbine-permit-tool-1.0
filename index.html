@@ -239,6 +239,7 @@
         <div class="s-kpi">
           <div class="box"><div class="v" id="s_months">&mdash;</div><div class="l">Permitting timeline</div></div>
           <div class="box"><div class="v" id="s_permitcost">&mdash;</div><div class="l">Permitting cost</div></div>
+          <div class="box" id="s_ctrlbox"><div class="v" id="s_ctrlperMW">&mdash;</div><div class="l">Emission controls ($/MW)</div></div>
         </div>
         <p class="foot" style="margin-top:8px">Very rough order-of-magnitude for planning only &mdash; replace with consultant &amp; vendor quotes. Excludes turbine/engine and balance-of-plant cost.</p>
       </div>
@@ -366,6 +367,20 @@
         <tbody id="ptebody"></tbody>
       </table>
       <p class="foot">Cells: <b style="color:var(--green)">green</b> below the Title V line · <b style="color:var(--amber)">amber</b> Title V–PSD · <b style="color:var(--red)">red</b> at/above the PSD line. Values follow the unit toggle; the legal thresholds (250 / 100 tpy) are defined in US short tons. CO₂ shown for context only — greenhouse gases cannot trigger PSD on their own.</p>
+    </div>
+
+    <div class="card" id="t_ctrlcard">
+      <h2>Control add-on cost <span class="hint" style="font-weight:400">(rough)</span></h2>
+      <div id="t_ctrlcost"></div>
+      <p class="foot" style="margin-top:6px;font-style:italic;border-left:3px solid var(--line);padding-left:8px">What each line covers &mdash; <b>Installed capital</b> is the all-in turnkey (EPC) build: equipment (SCR reactor, catalyst, ammonia-injection grid, reagent storage/vaporizer, new stack, CEMS) plus foundations, ductwork, piping, electrical, controls, engineering, commissioning &amp; contingency. <b>Annual O&amp;M</b> is separate: reagent (urea/ammonia), catalyst replacement (~3&ndash;5&nbsp;yr), auxiliary power and routine maintenance.</p>
+      <details class="adv" style="margin-top:8px"><summary>Cost rates</summary>
+        <div class="row2" style="margin-top:8px">
+          <div><label>SCR capital <span class="hint">$/kW</span></label><input id="tc_scr" type="number" step="5" value="320" oninput="calc()"></div>
+          <div><label>Oxidation catalyst <span class="hint">$/kW</span></label><input id="tc_cat" type="number" step="1" value="15" oninput="calc()"></div>
+        </div>
+        <div class="row2"><div><label>Annual O&amp;M <span class="hint">% of capital / yr</span></label><input id="tc_om" type="number" step="0.5" value="5" oninput="calc()"></div><div></div></div>
+      </details>
+      <p class="foot" style="margin-top:8px">SCR basis (worst-case <b>simple-cycle retrofit</b> &mdash; own reactor, tempering air, new stack per unit): <b>Sargent&nbsp;&amp;&nbsp;Lundy / EPA, 2022</b> ≈ $16M per 50&nbsp;MW unit ≈ <b>$320/kW</b> (2021$). New-build or shared reagent/CEMS runs lower; combined-cycle SCR is far cheaper (~$30&ndash;60/kW). Oxidation catalyst ≈ $15/kW. Adjust the rate to your EPC basis.</p>
     </div>
 
     <div class="card">
@@ -610,6 +625,12 @@
       </div>
       <details class="s-card" id="d_snapcard" style="margin-top:18px"><summary style="cursor:pointer;font-weight:700;color:var(--navy)">How these numbers are calculated</summary><div id="d_snapmath" style="margin-top:10px"></div></details>
       <div class="s-card" style="margin-top:18px"><h3>Regulatory determinations</h3><div id="dt_verdicts"></div></div>
+      <div class="s-card" style="margin-top:18px"><h3>Control add-on cost <span class="hint" style="font-weight:400">(rough)</span></h3><div id="d_ctrlcost"></div>
+        <details class="adv" style="margin-top:8px"><summary>Cost rates</summary>
+          <div class="row2" style="margin-top:8px"><div><label>SCR capital <span class="hint">$/kW</span></label><input id="dc_scr" type="number" step="5" value="80" oninput="dieselCalc()"></div><div><label>Oxidation catalyst <span class="hint">$/kW</span></label><input id="dc_cat" type="number" step="1" value="20" oninput="dieselCalc()"></div></div>
+          <div class="row2"><div><label>Annual O&amp;M <span class="hint">% of capital / yr</span></label><input id="dc_om" type="number" step="0.5" value="5" oninput="dieselCalc()"></div><div></div></div>
+        </details>
+      </div>
       <div class="s-card" style="margin-top:18px">
         <h3>Potential to emit &mdash; all units</h3>
         <table><thead><tr><th>Pollutant</th><th id="dt_ulb">lb/hr&middot;unit</th><th id="dt_utpy">tpy (plant)</th><th>vs limits</th></tr></thead><tbody id="dt_emitbody"></tbody></table>
@@ -825,6 +846,23 @@ function calc(){
     const tD = SI ? r.t*TON : r.t;               // t/yr if metric
     tb.innerHTML+=`<tr><td>${r.k}</td><td>${fmt(lbD,2)}</td><td class="tpy ${cls}">${fmt(tD)}</td><td>${flag}</td></tr>`;
   });
+
+  (function(){
+    var pName=(PRESETS[+$('preset').value]||{}).n||'';
+    var isProj=/6B/.test(pName) && units===4 && (document.getElementById('us_state')||{}).value==='TX';
+    var box=document.getElementById('s_ctrlbox'); if(box) box.style.display=isProj?'':'none';
+    var card=document.getElementById('t_ctrlcard'); if(card) card.style.display=isProj?'':'none';
+    if(!isProj){ return; }
+    var pkw=mw*units*1000;
+    var rs=parseFloat(($('tc_scr')||{}).value)||320, rc=parseFloat(($('tc_cat')||{}).value)||15, om=(parseFloat(($('tc_om')||{}).value)||5)/100;
+    var pMW=pkw/1000;
+    var capBase=pkw*rs+pkw*rc, capLo=capBase*0.65, capHi=capBase*1.30, omLo=capLo*om, omHi=capHi*om;
+    var perRange='$'+Math.round(capLo/pMW/1e4)*10+'k\u2013$'+Math.round(capHi/pMW/1e4)*10+'k/MW';
+    var capRange=_roughM(capLo)+'\u2013'+_roughM(capHi), omRange=_roughM(omLo)+'\u2013'+_roughM(omHi);
+    var spm=document.getElementById('s_ctrlperMW'); if(spm) spm.textContent=perRange;
+    var el=document.getElementById('t_ctrlcost');
+    if(el) el.innerHTML='<div style="font-size:15px;line-height:1.55"><b>Emission control system</b> \u2014 SCR + CO oxidation catalyst (low\u2013high):<br><span style="font-size:20px;font-weight:800;color:var(--navy)">'+perRange+'</span><br>'+capRange+' installed &nbsp;+&nbsp; '+omRange+'/yr to operate</div>'
+  })();
 
   // thresholds
   const st=$('status').value;
@@ -1229,6 +1267,24 @@ function dieselTab(name){
 }
 function dieselSetFactors(){var e=DEF[document.getElementById('d_ctrl').value]||DEF.t4; var m={df_nox:e.NOx,df_co:e.CO,df_voc:e.VOC,df_pm:e.PM,df_noxc:e.NOxC,df_o2:e.O2}; for(var k in m){var el=document.getElementById(k); if(el) el.value=m[k];}}
 var IFC_NOX=1460, IFC_PM=50; // mg/Nm3 @15% O2 - liquid CI engine, bore <400mm
+function _cmoney(v){ if(!isFinite(v)||v<=0) return '—'; if(v>=1e6) return '$'+(v/1e6).toFixed(v<1e7?2:1)+'M'; if(v>=1e3) return '$'+Math.round(v/1e3)+'k'; return '$'+Math.round(v);}
+function _roughM(v){ if(!isFinite(v)||v<=0) return '\u2014'; var m=v/1e6; if(m>=5) return '$'+Math.round(m/5)*5+'M'; if(m>=1) return '$'+m.toFixed(0)+'M'; if(v>=1e3) return '$'+Math.round(v/1e3)+'k'; return '$'+Math.round(v);}
+var CTRL_CRF=0.1098;  // capital recovery factor, ~7% / 15 yr
+function ctrlCostHTML(plantKW, devices){
+  var h='';
+  devices.forEach(function(d){
+    var cap=plantKW*d.rate, om=cap*d.omPct, ann=cap*CTRL_CRF+om;
+    var ce=(d.removedTpy>0)?ann/d.removedTpy:0;
+    h+='<div style="margin:8px 0;padding:8px 11px;border-left:4px solid '+d.color+';background:rgba(0,0,0,0.03);border-radius:5px">'
+      +'<div style="font-weight:700;color:'+d.color+';margin-bottom:2px">'+d.label+'</div>'
+      +'<div class="kv"><span>Installed capital</span><span><b>'+_cmoney(cap)+'</b> <span style="color:#8a99a8">('+Math.round(plantKW/1000)+' MW × $'+d.rate+'/kW)</span></span></div>'
+      +'<div class="kv"><span>Annual O&amp;M</span><span>'+_cmoney(om)+'/yr <span style="color:#8a99a8">('+Math.round(d.omPct*100)+'%)</span></span></div>'
+      +'<div class="kv" style="border:none"><span>Cost-effectiveness</span><span>'+(d.removedTpy>0?_cmoney(ce)+' / ton '+d.pollutant:'—')+'</span></div>'
+      +'</div>';
+  });
+  h+='<p class="foot" style="margin-top:6px">Order-of-magnitude only. Capital annualized at ~7% / 15 yr; ~90% removal assumed; tons are US short tons. Replace $/kW and O&amp;M% with vendor / EPC quotes.</p>';
+  return h;
+}
 function buildDieselChart(rows,si){
   var items=[{k:'NOx',name:'NOx',thr:500},{k:'SO2',name:'SO\u2082',thr:500},{k:'PM2.5 / PM10',name:'PM10',thr:50}];
   var UW=si?'t/yr':'tpy';
@@ -1339,6 +1395,16 @@ function dieselTech(R){
   add(R.significant?'v-bad':'v-ok','Significant source: '+(R.significant?'YES':'no'), R.significant?('Net increase reaches an IFC significant-source trigger (NOx/SO₂ ≥500 tpy, PM10 ≥50 tpy, or ≥50 MWth) → baseline ambient monitoring + atmospheric <b>dispersion modelling</b> (SCREEN3 then AERMOD/ADMS) demonstrating compliance with WHO/national ambient standards.'):('All pollutants stay below the significant-source triggers (NOx/SO₂ 500 tpy, PM10 50 tpy) and the plant is &lt;50 MWth → a screening-level assessment generally suffices.'));
   add(R.deg?'v-bad':'v-ok','Airshed: '+(R.deg?'degraded / sensitive':'non-degraded'), R.deg?('In a degraded or ecologically sensitive airshed, more stringent controls are expected and any increment must be minimised to a small fraction of the ambient standard.'):('In a non-degraded airshed the project should contribute ≤<b>25%</b> of the applicable ambient air-quality standard, preserving capacity for future development.'));
   add('v-warn','Project category: '+["C","B","A","A"][R.lane], 'Mapped to IFC environmental categorisation — '+["Category C: minimal or no adverse impacts; screening + ESMP.","Category B: limited, site-specific, largely reversible impacts; limited ESIA + ESMP.","Category A: potentially significant adverse impacts; full ESIA, refined modelling, stakeholder engagement & disclosure.","Category A in a sensitive setting: full ESIA plus best-available controls/offsets and continuous monitoring."][R.lane]);
+  (function(){
+    var cc=document.getElementById('d_ctrlcost'); if(!cc) return;
+    var pkw=R.kw*R.units, act=R.ctrl==='t4';
+    var rs=parseFloat((document.getElementById('dc_scr')||{}).value)||80, rc=parseFloat((document.getElementById('dc_cat')||{}).value)||20, om=(parseFloat((document.getElementById('dc_om')||{}).value)||5)/100;
+    var devs=[
+      {label:'SCR \u2014 NOx '+(act?'(selected)':'(add-on estimate)'),color:'#E8890C',rate:rs,omPct:om,removedTpy:(act?R.noxT*9:R.noxT*0.9),pollutant:'NOx'},
+      {label:'Oxidation catalyst \u2014 CO '+(act?'(selected)':'(add-on estimate)'),color:'#7D3C98',rate:rc,omPct:om,removedTpy:(act?R.coT*9:R.coT*0.9),pollutant:'CO'}
+    ];
+    cc.innerHTML=ctrlCostHTML(pkw,devs);
+  })();
   var ul=document.getElementById('dt_ulb'); if(ul) ul.textContent= si?'kg/hr·unit':'lb/hr·unit';
   var ut=document.getElementById('dt_utpy'); if(ut) ut.textContent= si?'t/yr (plant)':'tpy (plant)';
   var tb=document.getElementById('dt_emitbody'); tb.innerHTML='';
@@ -1410,7 +1476,7 @@ function dieselCalc(){
   if(significant) lane=2;                       // significant source -> Category A
   if(deg && !emergency) lane=Math.max(lane,2);  // degraded airshed + non-trivial source -> Category A
   if(significant && deg) lane=3;                // significant source in a degraded airshed -> heaviest
-  var R={rows:rows,noxT:noxT,so2T:so2T,pmT:pmT,kw:kw,hp:hp,hours:hours,units:units,cf:cf,heat:heatU,mwth:mwth,large:large,egvApplies:egvApplies,significant:significant,deg:deg,emergency:emergency,lane:lane,noxEF:ef.NOx,noxC:noxC,o2ref:o2ref,c15conc:c15conc,c15ef:c15ef,noxPass:noxPass,freq:freq,rpm:rpm,bsfc:bsfc,hhv:hhv,sulf:sulf,fuelKgHr:fuelKgHr,so2gHr:so2gHr,so2EF:so2EF,sulfOK:sulfOK};
+  var R={rows:rows,noxT:noxT,so2T:so2T,pmT:pmT,kw:kw,hp:hp,hours:hours,units:units,cf:cf,heat:heatU,mwth:mwth,large:large,egvApplies:egvApplies,significant:significant,deg:deg,emergency:emergency,lane:lane,noxEF:ef.NOx,noxC:noxC,o2ref:o2ref,c15conc:c15conc,c15ef:c15ef,noxPass:noxPass,freq:freq,rpm:rpm,bsfc:bsfc,hhv:hhv,sulf:sulf,fuelKgHr:fuelKgHr,so2gHr:so2gHr,so2EF:so2EF,sulfOK:sulfOK,ctrl:document.getElementById('d_ctrl').value,coT:get('CO')};
   dieselRender(R); dieselTech(R);
 }
 function dieselRender(R){
